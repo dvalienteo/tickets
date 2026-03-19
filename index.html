@@ -893,9 +893,9 @@ function selectEst(json){
     disp.innerHTML='<span class="badge by">Sin asignar — selecciona abajo</span>';
     wrap.style.display='block';sel.value='';
   }
-  // Sección A/B
-  mostrarSeccion('v', cicloFinal);
+  // Sección A/B — mostrar, resetear, luego pre-seleccionar si ya tiene
   resetSeccion('v');
+  mostrarSeccion('v', cicloFinal);
   if(r.seccion&&r.seccion!=='')setSeccion('v',r.seccion);
   document.getElementById('v-tkt').value='';
   clrMsg('msg-v');
@@ -980,7 +980,9 @@ function selectJug(json){
     disp.innerHTML='<span class="badge by">Sin asignar — selecciona abajo</span>';
     wrap.style.display='block';sel.value='';
   }
+  // Sección A/B
   resetSeccion('jug');
+  mostrarSeccion('jug', cicloFinal);
   if(r.seccion&&r.seccion!=='')setSeccion('jug',r.seccion);
   document.getElementById('jug-codigo').value='';
   clrMsg('msg-jug');
@@ -1075,8 +1077,8 @@ function selectCEst(json){
     wrap.style.display='block';sel.value='';
   }
   // Sección A/B
-  mostrarSeccion('c', cicloFinal);
   resetSeccion('c');
+  mostrarSeccion('c', cicloFinal);
   if(r.seccion&&r.seccion!=='')setSeccion('c',r.seccion);
   clrMsg('msg-cest');
   document.getElementById('c-form-est').style.display='block';
