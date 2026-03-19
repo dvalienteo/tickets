@@ -196,6 +196,14 @@ tr:last-child td{border-bottom:none;}
 .nv-b{background:#eff6ff;color:var(--cobalt);}.nv-g{background:#ecfdf5;color:var(--forest);}
 .nv-grn{background:#dcfce7;color:#15803d;}
 .sep{height:1px;background:var(--g100);margin:12px 0;}
+/* Sección A/B */
+.seccion-wrap{margin-bottom:12px;}
+.seccion-wrap label.sec-lbl{display:block;font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500);margin-bottom:6px;}
+.sec-opts{display:flex;gap:8px;}
+.sec-opt{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 10px;border:2px solid var(--g200);border-radius:var(--r-sm);cursor:pointer;transition:all .18s var(--ease);font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:var(--g500);}
+.sec-opt input[type=radio]{display:none;}
+.sec-opt.sel-A{border-color:var(--cobalt);background:#eff6ff;color:var(--cobalt);}
+.sec-opt.sel-B{border-color:#7c3aed;background:#f3e8ff;color:#7c3aed;}
 .spin{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:rot .65s linear infinite;}
 @keyframes rot{to{transform:rotate(360deg);}}
 .empty{text-align:center;color:var(--g400);padding:18px;font-size:.81rem;font-style:italic;}
@@ -335,11 +343,23 @@ var API_URL = "https://script.google.com/macros/s/AKfycbz7TCjGyIahEDA7OIFig7-FNZ
         </div>
         <div id="v-cic-wrap" class="field" style="display:none">
           <label>Asignar Ciclo / Categoría</label>
-          <select id="v-cic">
+          <select id="v-cic" onchange="mostrarSeccion('v',this.value)">
             <option value="">— Seleccionar —</option>
             <option>Primero</option><option>Tercero</option><option>Quinto</option>
             <option>Septimo</option><option>Noveno</option><option>Docente</option>
           </select>
+        </div>
+        <!-- Sección A/B — solo para estudiantes (no docentes) -->
+        <div id="v-sec-wrap" class="seccion-wrap" style="display:none">
+          <label class="sec-lbl">Sección</label>
+          <div class="sec-opts">
+            <label class="sec-opt" id="v-sec-a" onclick="setSeccion('v','A')">
+              <input type="radio" name="v-sec" value="A"> Sección A
+            </label>
+            <label class="sec-opt" id="v-sec-b" onclick="setSeccion('v','B')">
+              <input type="radio" name="v-sec" value="B"> Sección B
+            </label>
+          </div>
         </div>
         <div class="field">
           <label>No. de Ticket</label>
@@ -392,18 +412,30 @@ var API_URL = "https://script.google.com/macros/s/AKfycbz7TCjGyIahEDA7OIFig7-FNZ
         </div>
         <div id="jug-cic-wrap" class="field" style="display:none">
           <label>Asignar Ciclo / Categoría</label>
-          <select id="jug-cic">
+          <select id="jug-cic" onchange="mostrarSeccion('jug',this.value)">
             <option value="">— Seleccionar —</option>
             <option>Primero</option><option>Tercero</option><option>Quinto</option>
             <option>Septimo</option><option>Noveno</option><option>Docente</option>
           </select>
         </div>
         <div class="jug-box">
-          <div class="field" style="margin-bottom:0">
+          <div class="field" style="margin-bottom:8px">
             <label>Código de Jugador (ej. J-1, J-2…)</label>
             <input type="text" id="jug-codigo" placeholder="J-1"
                    style="text-transform:uppercase"
                    onkeydown="if(event.key==='Enter')saveJugador()">
+          </div>
+          <!-- Sección A/B para jugadores -->
+          <div class="seccion-wrap" style="margin-bottom:0">
+            <label class="sec-lbl">Sección</label>
+            <div class="sec-opts">
+              <label class="sec-opt" id="jug-sec-a" onclick="setSeccion('jug','A')">
+                <input type="radio" name="jug-sec" value="A"> Sección A
+              </label>
+              <label class="sec-opt" id="jug-sec-b" onclick="setSeccion('jug','B')">
+                <input type="radio" name="jug-sec" value="B"> Sección B
+              </label>
+            </div>
           </div>
         </div>
         <div id="msg-jug" class="msg"></div>
@@ -451,11 +483,23 @@ var API_URL = "https://script.google.com/macros/s/AKfycbz7TCjGyIahEDA7OIFig7-FNZ
         </div>
         <div id="c-cic-wrap" class="field" style="display:none">
           <label>Asignar Ciclo</label>
-          <select id="c-cic">
+          <select id="c-cic" onchange="mostrarSeccion('c',this.value)">
             <option value="">— Seleccionar —</option>
             <option>Primero</option><option>Tercero</option><option>Quinto</option>
             <option>Septimo</option><option>Noveno</option><option>Docente</option>
           </select>
+        </div>
+        <!-- Sección A/B — solo estudiantes -->
+        <div id="c-sec-wrap" class="seccion-wrap" style="display:none">
+          <label class="sec-lbl">Sección</label>
+          <div class="sec-opts">
+            <label class="sec-opt" id="c-sec-a" onclick="setSeccion('c','A')">
+              <input type="radio" name="c-sec" value="A"> Sección A
+            </label>
+            <label class="sec-opt" id="c-sec-b" onclick="setSeccion('c','B')">
+              <input type="radio" name="c-sec" value="B"> Sección B
+            </label>
+          </div>
         </div>
         <div class="pago-tabs">
           <div id="ptab-comp" class="pago-tab act-comp" onclick="setPago('completo')">✅ Pago Completo<br><small style="font-weight:400">Q250.00</small></div>
@@ -768,6 +812,36 @@ function doLogout(){
   clrMsg('msg-login');show('sc-login');
 }
 
+/* ── SECCIÓN A/B ── */
+function setSeccion(prefix, val){
+  var a=document.getElementById(prefix+'-sec-a');
+  var b=document.getElementById(prefix+'-sec-b');
+  if(!a||!b)return;
+  a.className='sec-opt'+(val==='A'?' sel-A':'');
+  b.className='sec-opt'+(val==='B'?' sel-B':'');
+  // marcar radio internamente
+  a.querySelector('input').checked=(val==='A');
+  b.querySelector('input').checked=(val==='B');
+}
+function getSeccion(prefix){
+  var el=document.querySelector('input[name="'+prefix+'-sec"]:checked');
+  return el?el.value:'';
+}
+function resetSeccion(prefix){
+  var a=document.getElementById(prefix+'-sec-a');
+  var b=document.getElementById(prefix+'-sec-b');
+  if(a){a.className='sec-opt';a.querySelector('input').checked=false;}
+  if(b){b.className='sec-opt';b.querySelector('input').checked=false;}
+}
+function mostrarSeccion(prefix, ciclo){
+  // Solo mostrar para ciclos que no sean Docente ni Particular
+  var wrap=document.getElementById(prefix+'-sec-wrap');
+  if(!wrap)return;
+  var esDo=(ciclo==='Docente'||ciclo==='Particular'||ciclo==='');
+  wrap.style.display=esDo?'none':'block';
+  if(esDo)resetSeccion(prefix);
+}
+
 /* ── MODO VENTA ── */
 function setModo(m){
   S.modo=m;
@@ -809,7 +883,9 @@ function selectEst(json){
   var wrap=document.getElementById('v-cic-wrap');
   var disp=document.getElementById('v-cic-disp');
   var sel=document.getElementById('v-cic');
+  var cicloFinal='';
   if(r.ciclo&&r.ciclo.trim()!==''){
+    cicloFinal=r.ciclo;
     var bc=r.ciclo==='Docente'?'bv':'bg';
     disp.innerHTML=r.ciclo+' <span class="badge '+bc+'">✓ Ya registrado</span>';
     wrap.style.display='none';sel.value=r.ciclo;
@@ -817,6 +893,10 @@ function selectEst(json){
     disp.innerHTML='<span class="badge by">Sin asignar — selecciona abajo</span>';
     wrap.style.display='block';sel.value='';
   }
+  // Sección A/B
+  mostrarSeccion('v', cicloFinal);
+  resetSeccion('v');
+  if(r.seccion&&r.seccion!=='')setSeccion('v',r.seccion);
   document.getElementById('v-tkt').value='';
   clrMsg('msg-v');
   document.getElementById('v-form-est').style.display='block';
@@ -830,11 +910,12 @@ async function saveVentaEst(){
   if(!ciclo){msgEl('msg-v','Selecciona el ciclo/categoría.','err');return;}
   var tkt=document.getElementById('v-tkt').value.trim();
   if(!tkt){msgEl('msg-v','Ingresa el número de ticket.','err');return;}
+  var seccion=getSeccion('v');
   var btn=document.getElementById('btn-v');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Guardando…';
   try{
-    var res=await apiPost({action:'registrarVenta',evento:S.evento,nombre:est.nombre,ciclo:ciclo,ticket:tkt,rowListado:est.rowIndex,usuario:S.user.pin,nombreUsuario:S.user.nombre});
-    if(res.ok){showModal('🎉','¡Venta Registrada!','Ticket No. '+tkt+'\n'+est.nombre+'\nCiclo: '+res.ciclo);limpiarEst();}
+    var res=await apiPost({action:'registrarVenta',evento:S.evento,nombre:est.nombre,ciclo:ciclo,ticket:tkt,seccion:seccion,rowListado:parseInt(est.rowIndex,10)||-1,usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    if(res.ok){showModal('🎉','¡Venta Registrada!','Ticket No. '+tkt+'\n'+est.nombre+'\nCiclo: '+res.ciclo+(seccion?'\nSección: '+seccion:''));limpiarEst();}
     else msgEl('msg-v','❌ '+(res.msg||'Error al registrar.'),'err');
   }catch(e){msgEl('msg-v','⚠️ Error de conexión. Intenta de nuevo.','err');}
   finally{btn.disabled=false;btn.innerHTML='REGISTRAR VENTA';}
@@ -856,7 +937,7 @@ async function saveVentaPart(){
   finally{btn.disabled=false;btn.innerHTML='REGISTRAR PARTICULAR';}
 }
 
-function limpiarEst(){S.est=null;document.getElementById('v-q').value='';document.getElementById('v-list').innerHTML='';document.getElementById('v-form-est').style.display='none';document.getElementById('v-tkt').value='';clrMsg('msg-v');}
+function limpiarEst(){S.est=null;document.getElementById('v-q').value='';document.getElementById('v-list').innerHTML='';document.getElementById('v-form-est').style.display='none';document.getElementById('v-tkt').value='';resetSeccion('v');document.getElementById('v-sec-wrap').style.display='none';clrMsg('msg-v');}
 function limpiarPart(){document.getElementById('p-nombre').value='';document.getElementById('p-ticket').value='';clrMsg('msg-p');}
 
 /* ── JUGADOR ── */
@@ -889,7 +970,9 @@ function selectJug(json){
   var wrap=document.getElementById('jug-cic-wrap');
   var disp=document.getElementById('jug-cic-disp');
   var sel=document.getElementById('jug-cic');
+  var cicloFinal='';
   if(r.ciclo&&r.ciclo.trim()!==''){
+    cicloFinal=r.ciclo;
     var bc=r.ciclo==='Docente'?'bv':'bg';
     disp.innerHTML=r.ciclo+' <span class="badge '+bc+'">✓ Ya registrado</span>';
     wrap.style.display='none';sel.value=r.ciclo;
@@ -897,6 +980,8 @@ function selectJug(json){
     disp.innerHTML='<span class="badge by">Sin asignar — selecciona abajo</span>';
     wrap.style.display='block';sel.value='';
   }
+  resetSeccion('jug');
+  if(r.seccion&&r.seccion!=='')setSeccion('jug',r.seccion);
   document.getElementById('jug-codigo').value='';
   clrMsg('msg-jug');
   document.getElementById('jug-form').style.display='block';
@@ -909,12 +994,13 @@ async function saveJugador(){
   var codigo=document.getElementById('jug-codigo').value.trim().toUpperCase();
   if(!codigo){msgEl('msg-jug','Ingresa el código del jugador (ej. J-1).','err');return;}
   if(!codigo.match(/^J-\d+$/)){msgEl('msg-jug','El código debe ser J-1, J-2, J-10, etc.','err');return;}
+  var seccion=getSeccion('jug');
   var btn=document.getElementById('btn-jug');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Registrando…';
   try{
-    var res=await apiPost({action:'registrarJugador',nombre:jug.nombre,ciclo:ciclo,codigo:codigo,rowListado:jug.rowIndex,usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    var res=await apiPost({action:'registrarJugador',nombre:jug.nombre,ciclo:ciclo,codigo:codigo,seccion:seccion,rowListado:parseInt(jug.rowIndex,10)||-1,usuario:S.user.pin,nombreUsuario:S.user.nombre});
     if(res.ok){
-      showModal('⚽','¡Jugador Registrado!',jug.nombre+'\nCiclo: '+res.ciclo+'\nCódigo: '+res.codigo);
+      showModal('⚽','¡Jugador Registrado!',jug.nombre+'\nCiclo: '+res.ciclo+'\nCódigo: '+res.codigo+(seccion?'\nSección: '+seccion:''));
       limpiarJug();
     }else msgEl('msg-jug','❌ '+(res.msg||'Error al registrar.'),'err');
   }catch(e){msgEl('msg-jug','⚠️ Error de conexión.','err');}
@@ -926,6 +1012,7 @@ function limpiarJug(){
   document.getElementById('jug-list').innerHTML='';
   document.getElementById('jug-form').style.display='none';
   document.getElementById('jug-codigo').value='';
+  resetSeccion('jug');
   clrMsg('msg-jug');
 }
 
@@ -977,7 +1064,9 @@ function selectCEst(json){
   var wrap=document.getElementById('c-cic-wrap');
   var disp=document.getElementById('c-cic-disp');
   var sel=document.getElementById('c-cic');
+  var cicloFinal='';
   if(r.ciclo&&r.ciclo.trim()!==''){
+    cicloFinal=r.ciclo;
     var bc=r.ciclo==='Docente'?'bv':'bg';
     disp.innerHTML=r.ciclo+' <span class="badge '+bc+'">✓ Ya registrado</span>';
     wrap.style.display='none';sel.value=r.ciclo;
@@ -985,6 +1074,10 @@ function selectCEst(json){
     disp.innerHTML='<span class="badge by">Sin asignar — selecciona abajo</span>';
     wrap.style.display='block';sel.value='';
   }
+  // Sección A/B
+  mostrarSeccion('c', cicloFinal);
+  resetSeccion('c');
+  if(r.seccion&&r.seccion!=='')setSeccion('c',r.seccion);
   clrMsg('msg-cest');
   document.getElementById('c-form-est').style.display='block';
 }
@@ -1025,12 +1118,13 @@ async function saveCEst(){
     if(abono<=0){msgEl('msg-cest','Ingresa el monto del abono.','err');return;}
     if(abono>=250){msgEl('msg-cest','El abono cubre el total. Usa Pago Completo.','err');return;}
   }
+  var seccion=getSeccion('c');
   var btn=document.getElementById('btn-cest');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Guardando…';
   try{
-    var res=await apiPost({action:'registrarVentaCongreso',nombre:est.nombre,ciclo:ciclo,ticket:ticket,tipoPago:S.tipoPago,abono:abono,correo:correo,telefono:telefono,rowListado:est.rowIndex,usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    var res=await apiPost({action:'registrarVentaCongreso',nombre:est.nombre,ciclo:ciclo,ticket:ticket,tipoPago:S.tipoPago,abono:abono,correo:correo,telefono:telefono,seccion:seccion,rowListado:parseInt(est.rowIndex,10)||-1,usuario:S.user.pin,nombreUsuario:S.user.nombre});
     if(res.ok){
-      var txt=S.tipoPago==='completo'?'Ticket No. '+ticket+'\n'+est.nombre+'\nCiclo: '+res.ciclo+'\nMonto: Q250.00':est.nombre+'\nAbono: Q'+abono+'\nSaldo pendiente: Q'+res.saldo;
+      var txt=S.tipoPago==='completo'?'Ticket No. '+ticket+'\n'+est.nombre+'\nCiclo: '+res.ciclo+(seccion?'\nSección: '+seccion:'')+'\nMonto: Q250.00':est.nombre+'\nAbono: Q'+abono+'\nSaldo pendiente: Q'+res.saldo;
       showModal('🎉',S.tipoPago==='completo'?'¡Venta Congreso Registrada!':'¡Abono Registrado!',txt);
       limpiarCEst();
     }else msgEl('msg-cest','❌ '+(res.msg||'Error.'),'err');
@@ -1058,7 +1152,7 @@ async function saveCPart(){
   finally{btn.disabled=false;btn.innerHTML='REGISTRAR PARTICULAR';}
 }
 
-function limpiarCEst(){S.cEst=null;document.getElementById('cq').value='';document.getElementById('c-list').innerHTML='';document.getElementById('c-form-est').style.display='none';document.getElementById('c-tkt-comp').value='';document.getElementById('c-abono').value='';document.getElementById('c-correo-est').value='';document.getElementById('c-tel-est').value='';document.getElementById('c-saldo-preview').style.display='none';clrMsg('msg-cest');}
+function limpiarCEst(){S.cEst=null;document.getElementById('cq').value='';document.getElementById('c-list').innerHTML='';document.getElementById('c-form-est').style.display='none';document.getElementById('c-tkt-comp').value='';document.getElementById('c-abono').value='';document.getElementById('c-correo-est').value='';document.getElementById('c-tel-est').value='';document.getElementById('c-saldo-preview').style.display='none';resetSeccion('c');var csw=document.getElementById('c-sec-wrap');if(csw)csw.style.display='none';clrMsg('msg-cest');}
 function limpiarCPart(){document.getElementById('cp-nombre').value='';document.getElementById('cp-ticket').value='';document.getElementById('cp-correo').value='';document.getElementById('cp-tel').value='';clrMsg('msg-cpart');}
 
 /* ── COMPLETAR PAGO CONGRESO ── */
