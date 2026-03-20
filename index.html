@@ -25,7 +25,15 @@ body::before{content:'';position:fixed;inset:0;
 body::after{content:'';position:fixed;inset:0;
   background-image:radial-gradient(circle,rgba(255,255,255,.03) 1px,transparent 1px);
   background-size:28px 28px;z-index:-1;}
-.screen{display:none;min-height:100vh;padding:20px 16px;align-items:center;justify-content:center;flex-direction:column;}
+/* Logo fijo esquina superior izquierda */
+.logo-watermark{
+  position:fixed;top:0;left:0;z-index:10;pointer-events:none;
+  padding:10px 14px;}
+.logo-watermark img{
+  height:190px;width:auto;
+  display:block;
+  user-select:none;-webkit-user-drag:none;}
+.screen{display:none;min-height:100vh;padding:20px 16px;padding-top:210px;align-items:center;justify-content:center;flex-direction:column;position:relative;z-index:1;}
 .screen.active{display:flex;}
 .card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--sh-lg);
   width:100%;max-width:460px;padding:28px 24px;position:relative;overflow:hidden;
@@ -223,10 +231,14 @@ tr:last-child td{border-bottom:none;}
   font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:var(--g500);text-align:center;}
 .ci-tab.act{border-color:var(--navy);background:var(--navy);color:#fff;}
 @supports(padding:max(0px)){.screen{padding-bottom:max(20px,env(safe-area-inset-bottom));}}
-@media(max-width:480px){.card{padding:20px 14px;}h1{font-size:1.25rem;}.dlbl{min-width:78px;}.ev-grid{gap:6px;}}
+@media(max-width:480px){.card{padding:20px 14px;}h1{font-size:1.25rem;}.dlbl{min-width:78px;}.ev-grid{gap:6px;}.logo-watermark img{height:120px;}.screen{padding-top:140px;}}
 </style>
 </head>
 <body>
+<!-- Marca de agua logo -->
+<div class="logo-watermark">
+  <img src="https://i.ibb.co/Kx7c7gDZ/01-Logo-2026-3.png" alt="" aria-hidden="true">
+</div>
 <script>
 var API_URL = "https://script.google.com/macros/s/AKfycbwFuBIGXNSVITeYirnthkVeac80o0oWx47CZRJE9tdNH41fagH50QyG7EtGKRha2vf_KQ/exec";
 </script>
@@ -245,7 +257,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwFuBIGXNSVITeYirnthkVeac
 <div id="sc-login" class="screen active">
 <div class="card">
   <div class="logo-wrap">
-    <img src="./logo.png" class="logo-img" alt="Logo FII" onerror="this.style.display='none'">
+    <img src="https://i.ibb.co/Kx7c7gDZ/01-Logo-2026-3.png" class="logo-img" alt="Logo FII" onerror="this.style.display='none'">
     <h1>Sistema de Tickets</h1>
     <p class="tagline">Facultad de Ingeniería Industrial</p>
   </div>
@@ -263,7 +275,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwFuBIGXNSVITeYirnthkVeac
 <div id="sc-menu" class="screen">
 <div class="card">
   <div class="logo-wrap" style="margin-bottom:8px">
-    <img src="./logo.png" class="logo-img" alt="Logo FII" onerror="this.style.display='none'">
+    <img src="https://i.ibb.co/Kx7c7gDZ/01-Logo-2026-3.png" class="logo-img" alt="Logo FII" onerror="this.style.display='none'">
   </div>
   <div class="sesbar">👤 Hola, <strong id="u-menu">—</strong></div>
   <div class="menu-stack">
@@ -419,10 +431,21 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwFuBIGXNSVITeYirnthkVeac
           </select>
         </div>
         <div class="jug-box">
+          <!-- Selector de equipo -->
+          <div class="field" style="margin-bottom:10px">
+            <label>Equipo</label>
+            <div class="sec-opts">
+              <label class="sec-opt" id="jug-eq-a" onclick="setEquipo('A')"><input type="radio" name="jug-eq" value="A"> Equipo A</label>
+              <label class="sec-opt" id="jug-eq-b" onclick="setEquipo('B')"><input type="radio" name="jug-eq" value="B"> Equipo B</label>
+              <label class="sec-opt" id="jug-eq-c" onclick="setEquipo('C')"><input type="radio" name="jug-eq" value="C"> Equipo C</label>
+              <label class="sec-opt" id="jug-eq-d" onclick="setEquipo('D')"><input type="radio" name="jug-eq" value="D"> Equipo D</label>
+            </div>
+          </div>
+          <!-- Código generado -->
           <div class="field" style="margin-bottom:8px">
-            <label>Código de Jugador (ej. J-1, J-2…)</label>
-            <input type="text" id="jug-codigo" placeholder="J-1"
-                   style="text-transform:uppercase"
+            <label>Código de Jugador <span id="jug-cod-hint" style="color:var(--g400);font-weight:400;text-transform:none;font-size:.7rem"></span></label>
+            <input type="text" id="jug-codigo" placeholder="Selecciona un equipo primero…"
+                   style="text-transform:uppercase;font-weight:700;letter-spacing:.05em"
                    onkeydown="if(event.key==='Enter')saveJugador()">
           </div>
           <!-- Sección A/B para jugadores -->
@@ -940,6 +963,31 @@ async function saveVentaPart(){
 function limpiarEst(){S.est=null;document.getElementById('v-q').value='';document.getElementById('v-list').innerHTML='';document.getElementById('v-form-est').style.display='none';document.getElementById('v-tkt').value='';resetSeccion('v');document.getElementById('v-sec-wrap').style.display='none';clrMsg('msg-v');}
 function limpiarPart(){document.getElementById('p-nombre').value='';document.getElementById('p-ticket').value='';clrMsg('msg-p');}
 
+/* ── EQUIPO JUGADOR ── */
+function setEquipo(eq){
+  ['A','B','C','D'].forEach(function(e){
+    var el=document.getElementById('jug-eq-'+e.toLowerCase());
+    if(!el)return;
+    el.className='sec-opt'+(e===eq?' sel-A':'');
+    el.querySelector('input').checked=(e===eq);
+  });
+  // Consultar siguiente código al servidor
+  var inp=document.getElementById('jug-codigo');
+  var hint=document.getElementById('jug-cod-hint');
+  inp.value='';
+  inp.placeholder='Cargando…';
+  if(hint)hint.textContent='';
+  apiGet({action:'siguienteCodigo',equipo:eq}).then(function(res){
+    var cod=res.codigo||('J'+eq+'-1');
+    inp.value=cod;
+    inp.placeholder=cod;
+    if(hint)hint.textContent='(sugerido — puedes cambiarlo)';
+  }).catch(function(){
+    inp.value='J'+eq+'-1';
+    inp.placeholder='J'+eq+'-1';
+  });
+}
+
 /* ── JUGADOR ── */
 var _jtmr=null;
 function liveSearchJug(){clearTimeout(_jtmr);_jtmr=setTimeout(doSearchJug,350);}
@@ -995,7 +1043,7 @@ async function saveJugador(){
   if(!ciclo){msgEl('msg-jug','Selecciona el ciclo/categoría.','err');return;}
   var codigo=document.getElementById('jug-codigo').value.trim().toUpperCase();
   if(!codigo){msgEl('msg-jug','Ingresa el código del jugador (ej. J-1).','err');return;}
-  if(!codigo.match(/^J-\d+$/)){msgEl('msg-jug','El código debe ser J-1, J-2, J-10, etc.','err');return;}
+  if(!codigo.match(/^J[ABCD]-\d+$/)){msgEl('msg-jug','El código debe ser JA-1, JB-1, JC-1 o JD-1.','err');return;}
   var seccion=getSeccion('jug');
   var btn=document.getElementById('btn-jug');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Registrando…';
@@ -1014,6 +1062,12 @@ function limpiarJug(){
   document.getElementById('jug-list').innerHTML='';
   document.getElementById('jug-form').style.display='none';
   document.getElementById('jug-codigo').value='';
+  document.getElementById('jug-codigo').placeholder='Selecciona un equipo primero…';
+  var hint=document.getElementById('jug-cod-hint');if(hint)hint.textContent='';
+  ['A','B','C','D'].forEach(function(e){
+    var el=document.getElementById('jug-eq-'+e.toLowerCase());
+    if(el){el.className='sec-opt';el.querySelector('input').checked=false;}
+  });
   resetSeccion('jug');
   clrMsg('msg-jug');
 }
@@ -1197,7 +1251,7 @@ async function doCompletar(){
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Procesando…';
   try{
     var res=await apiPost({action:'completarPagoCongreso',rowIndex:S.compRow.rowIndex,ticket:tkt,usuario:S.user.pin,nombreUsuario:S.user.nombre});
-    if(res.ok){showModal('✅','¡Pago Completado!',S.compRow.nombre+'\nTicket No. '+tkt+' asignado.\nPago total: Q250.00');limpiarComp();}
+    if(res.ok){showModal('✅','¡Pago Completado!',S.compRow.nombre+'\nTicket No. '+tkt+' asignado.\nAbono anterior: Q'+S.compRow.abono+'\nSaldo pagado: Q'+S.compRow.saldo+'\nTotal: Q'+(parseFloat(S.compRow.abono)+parseFloat(S.compRow.saldo)));limpiarComp();}
     else msgEl('msg-comp','❌ '+(res.msg||'Error.'),'err');
   }catch(e){msgEl('msg-comp','⚠️ Error de conexión.','err');}
   finally{btn.disabled=false;btn.innerHTML='✅ COMPLETAR PAGO Y ASIGNAR TICKET';}
@@ -1240,7 +1294,7 @@ async function doCINomSearch(){
     var arr=res.resultados||[];
     if(!arr.length){list.innerHTML='<p class="empty">Sin resultados para "'+q+'"</p>';return;}
     list.innerHTML=arr.map(r=>{
-      var esJug=r.ticket&&r.ticket.toUpperCase().match(/^J-\d+$/);
+      var esJug=r.ticket&&r.ticket.toUpperCase().match(/^J[ABCD]-\d+$/);
       var badge=esJug?'<span class="badge bjug">⚽ Jugador</span>':'<span class="badge bb">🎟️ '+r.ticket+'</span>';
       var ci=r.checkin?'<span class="badge br">Ya ingresó</span>':'<span class="badge bg">Pendiente</span>';
       var data=encodeURIComponent(JSON.stringify(r));
@@ -1268,7 +1322,7 @@ function mostrarResultadoCI(res){
   S.ciRow=res.rowIndex;
   setText('ci-nom-val',res.nombre);
   setText('ci-cic',res.ciclo||'—');
-  var esJug=res.ticket&&res.ticket.toUpperCase().match(/^J-\d+$/)||res.esJugador;
+  var esJug=res.ticket&&res.ticket.toUpperCase().match(/^J[ABCD]-\d+$/)||res.esJugador;
   document.getElementById('ci-code-lbl').textContent=esJug?'Código Jugador':'No. de Ticket';
   setText('ci-num',res.ticket);
   // color de la tarjeta según tipo
