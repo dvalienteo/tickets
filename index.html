@@ -240,7 +240,7 @@ tr:last-child td{border-bottom:none;}
   <img src="https://i.ibb.co/Kx7c7gDZ/01-Logo-2026-3.png" alt="" aria-hidden="true">
 </div>
 <script>
-var API_URL = "https://script.google.com/macros/s/AKfycbwFuBIGXNSVITeYirnthkVeac80o0oWx47CZRJE9tdNH41fagH50QyG7EtGKRha2vf_KQ/exec";
+var API_URL = "https://script.google.com/macros/s/AKfycbyn3BonkKYJa2yBKVJoZDK9nIV5dE20biDQ1qtirjAEi3wL0kswuyPMXgqNAATMgStHVQ/exec";
 </script>
 
 <!-- MODAL -->
@@ -648,7 +648,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwFuBIGXNSVITeYirnthkVeac
       <div class="field">
         <label id="ci-tkt-label">No. de Ticket o Código Jugador</label>
         <div class="input-row">
-          <input type="text" id="ci-tkt" placeholder="Ej. 025 o JA-1…"
+          <input type="text" id="ci-tkt" placeholder="Ej. 025 o J-1…"
                  style="text-transform:uppercase"
                  onkeydown="if(event.key==='Enter')searchTicket()">
           <button class="btn btn-icon" onclick="searchTicket()">🔍</button>
@@ -1042,7 +1042,7 @@ async function saveJugador(){
   var ciclo=(jug.ciclo&&jug.ciclo.trim()!=='')?jug.ciclo:document.getElementById('jug-cic').value;
   if(!ciclo){msgEl('msg-jug','Selecciona el ciclo/categoría.','err');return;}
   var codigo=document.getElementById('jug-codigo').value.trim().toUpperCase();
-  if(!codigo){msgEl('msg-jug','Ingresa el código del jugador (ej. JA-1, JB-1).','err');return;}
+  if(!codigo){msgEl('msg-jug','Ingresa el código del jugador (ej. J-1).','err');return;}
   if(!codigo.match(/^J[ABCD]-\d+$/)){msgEl('msg-jug','El código debe ser JA-1, JB-1, JC-1 o JD-1.','err');return;}
   var seccion=getSeccion('jug');
   var btn=document.getElementById('btn-jug');
