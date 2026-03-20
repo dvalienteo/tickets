@@ -648,7 +648,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbwFuBIGXNSVITeYirnthkVeac
       <div class="field">
         <label id="ci-tkt-label">No. de Ticket o Código Jugador</label>
         <div class="input-row">
-          <input type="text" id="ci-tkt" placeholder="Ej. 025 o J-1…"
+          <input type="text" id="ci-tkt" placeholder="Ej. 025 o JA-1…"
                  style="text-transform:uppercase"
                  onkeydown="if(event.key==='Enter')searchTicket()">
           <button class="btn btn-icon" onclick="searchTicket()">🔍</button>
@@ -1042,8 +1042,8 @@ async function saveJugador(){
   var ciclo=(jug.ciclo&&jug.ciclo.trim()!=='')?jug.ciclo:document.getElementById('jug-cic').value;
   if(!ciclo){msgEl('msg-jug','Selecciona el ciclo/categoría.','err');return;}
   var codigo=document.getElementById('jug-codigo').value.trim().toUpperCase();
-  if(!codigo){msgEl('msg-jug','Ingresa el código del jugador (ej. J-1).','err');return;}
-  if(!codigo.match(/^J[ABCD]-\d+$/)){msgEl('msg-jug','El código debe ser JA-1, JB-1, JC-1 o JD-1.','err');return;} 
+  if(!codigo){msgEl('msg-jug','Ingresa el código del jugador (ej. JA-1, JB-1).','err');return;}
+  if(!codigo.match(/^J[ABCD]-\d+$/)){msgEl('msg-jug','El código debe ser JA-1, JB-1, JC-1 o JD-1.','err');return;}
   var seccion=getSeccion('jug');
   var btn=document.getElementById('btn-jug');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Registrando…';
