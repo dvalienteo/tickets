@@ -1043,7 +1043,7 @@ async function saveJugador(){
   if(!ciclo){msgEl('msg-jug','Selecciona el ciclo/categoría.','err');return;}
   var codigo=document.getElementById('jug-codigo').value.trim().toUpperCase();
   if(!codigo){msgEl('msg-jug','Ingresa el código del jugador (ej. J-1).','err');return;}
-  if(!codigo.match(/^J[ABCD]-\d+$/)){msgEl('msg-jug','El código debe ser JA-1, JB-1, JC-1 o JD-1.','err');return;}
+  if(!codigo.match(/^J[ABCD]-\d+$/)){msgEl('msg-jug','El código debe ser JA-1, JB-1, JC-1 o JD-1.','err');return;} 
   var seccion=getSeccion('jug');
   var btn=document.getElementById('btn-jug');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Registrando…';
