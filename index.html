@@ -536,7 +536,11 @@ var API_URL = "https://script.google.com/macros/s/AKfycbyn3BonkKYJa2yBKVJoZDK9nI
           </div>
         </div>
         <div id="pago-parcial-box" style="display:none">
-          <div class="saldo-badge">⚠️ Sin ticket hasta completar Q250.00</div>
+          <div class="saldo-badge">⚠️ Pago parcial — saldo pendiente de Q250.00</div>
+          <div class="field">
+            <label>No. de Ticket</label>
+            <input type="text" id="c-tkt-parc" placeholder="Ej. 025">
+          </div>
           <div class="field">
             <label>Monto de Abono (Q)</label>
             <input type="number" id="c-abono" placeholder="Ej. 100" min="1" max="249">
@@ -612,13 +616,10 @@ var API_URL = "https://script.google.com/macros/s/AKfycbyn3BonkKYJa2yBKVJoZDK9nI
         <div class="drow"><span class="dlbl">Abono anterior</span><span class="dval" id="comp-abono">—</span></div>
         <div class="drow"><span class="dlbl">Saldo pendiente</span><span class="dval" id="comp-saldo">—</span></div>
       </div>
-      <div class="field">
-        <label>No. de Ticket (al completar pago)</label>
-        <input type="text" id="comp-tkt" placeholder="Ej. 025">
-      </div>
+      <div class="m-inf msg show" style="margin-bottom:10px">ℹ️ Al completar el pago el saldo quedará en Q0.00. El ticket ya fue asignado al registrar el abono.</div>
       <div id="msg-comp" class="msg"></div>
       <div style="display:flex;flex-direction:column;gap:7px">
-        <button class="btn btn-forest" id="btn-comp" onclick="doCompletar()">✅ COMPLETAR PAGO Y ASIGNAR TICKET</button>
+        <button class="btn btn-forest" id="btn-comp" onclick="doCompletar()">✅ COMPLETAR PAGO</button>
         <button class="btn btn-soft" onclick="limpiarComp()">🗑️ Limpiar</button>
       </div>
     </div>
@@ -1170,6 +1171,8 @@ async function saveCEst(){
     if(!ticket){msgEl('msg-cest','Ingresa el número de ticket.','err');return;}
     abono=250;
   }else{
+    ticket=document.getElementById('c-tkt-parc').value.trim();
+    if(!ticket){msgEl('msg-cest','Ingresa el número de ticket.','err');return;}
     abono=parseFloat(document.getElementById('c-abono').value)||0;
     if(abono<=0){msgEl('msg-cest','Ingresa el monto del abono.','err');return;}
     if(abono>=250){msgEl('msg-cest','El abono cubre el total. Usa Pago Completo.','err');return;}
@@ -1208,7 +1211,7 @@ async function saveCPart(){
   finally{btn.disabled=false;btn.innerHTML='REGISTRAR PARTICULAR';}
 }
 
-function limpiarCEst(){S.cEst=null;document.getElementById('cq').value='';document.getElementById('c-list').innerHTML='';document.getElementById('c-form-est').style.display='none';document.getElementById('c-tkt-comp').value='';document.getElementById('c-abono').value='';document.getElementById('c-correo-est').value='';document.getElementById('c-tel-est').value='';document.getElementById('c-saldo-preview').style.display='none';resetSeccion('c');var csw=document.getElementById('c-sec-wrap');if(csw)csw.style.display='none';clrMsg('msg-cest');}
+function limpiarCEst(){S.cEst=null;document.getElementById('cq').value='';document.getElementById('c-list').innerHTML='';document.getElementById('c-form-est').style.display='none';document.getElementById('c-tkt-comp').value='';document.getElementById('c-tkt-parc').value='';document.getElementById('c-abono').value='';document.getElementById('c-correo-est').value='';document.getElementById('c-tel-est').value='';document.getElementById('c-saldo-preview').style.display='none';resetSeccion('c');var csw=document.getElementById('c-sec-wrap');if(csw)csw.style.display='none';clrMsg('msg-cest');}
 function limpiarCPart(){document.getElementById('cp-nombre').value='';document.getElementById('cp-ticket').value='';document.getElementById('cp-correo').value='';document.getElementById('cp-tel').value='';clrMsg('msg-cpart');}
 
 /* ── COMPLETAR PAGO CONGRESO ── */
@@ -1245,18 +1248,22 @@ function selectComp(json){
 }
 async function doCompletar(){
   if(!S.compRow)return;
-  var tkt=document.getElementById('comp-tkt').value.trim();
-  if(!tkt){msgEl('msg-comp','Ingresa el número de ticket.','err');return;}
   var btn=document.getElementById('btn-comp');
   btn.disabled=true;btn.innerHTML='<span class="spin"></span> Procesando…';
   try{
-    var res=await apiPost({action:'completarPagoCongreso',rowIndex:S.compRow.rowIndex,ticket:tkt,usuario:S.user.pin,nombreUsuario:S.user.nombre});
-    if(res.ok){showModal('✅','¡Pago Completado!',S.compRow.nombre+'\nTicket No. '+tkt+' asignado.\nAbono anterior: Q'+S.compRow.abono+'\nSaldo pagado: Q'+S.compRow.saldo+'\nTotal: Q'+(parseFloat(S.compRow.abono)+parseFloat(S.compRow.saldo)));limpiarComp();}
-    else msgEl('msg-comp','❌ '+(res.msg||'Error.'),'err');
+    var res=await apiPost({action:'completarPagoCongreso',rowIndex:S.compRow.rowIndex,ticket:'',usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    if(res.ok){
+      var total=(parseFloat(S.compRow.abono)+parseFloat(S.compRow.saldo)).toFixed(2);
+      showModal('✅','¡Pago Completado!',S.compRow.nombre+'
+Abono anterior: Q'+S.compRow.abono+'
+Saldo cancelado: Q'+S.compRow.saldo+'
+Total: Q'+total);
+      limpiarComp();
+    }else msgEl('msg-comp','❌ '+(res.msg||'Error.'),'err');
   }catch(e){msgEl('msg-comp','⚠️ Error de conexión.','err');}
-  finally{btn.disabled=false;btn.innerHTML='✅ COMPLETAR PAGO Y ASIGNAR TICKET';}
+  finally{btn.disabled=false;btn.innerHTML='✅ COMPLETAR PAGO';}
 }
-function limpiarComp(){S.compRow=null;document.getElementById('comp-q').value='';document.getElementById('comp-list').innerHTML='';document.getElementById('comp-form').style.display='none';document.getElementById('comp-tkt').value='';clrMsg('msg-comp');}
+function limpiarComp(){S.compRow=null;document.getElementById('comp-q').value='';document.getElementById('comp-list').innerHTML='';document.getElementById('comp-form').style.display='none';clrMsg('msg-comp');}
 
 /* ── CHECK-IN TABS ── */
 function setCITab(tab){
