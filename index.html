@@ -1254,10 +1254,7 @@ async function doCompletar(){
     var res=await apiPost({action:'completarPagoCongreso',rowIndex:S.compRow.rowIndex,ticket:'',usuario:S.user.pin,nombreUsuario:S.user.nombre});
     if(res.ok){
       var total=(parseFloat(S.compRow.abono)+parseFloat(S.compRow.saldo)).toFixed(2);
-      showModal('✅','¡Pago Completado!',S.compRow.nombre+'
-Abono anterior: Q'+S.compRow.abono+'
-Saldo cancelado: Q'+S.compRow.saldo+'
-Total: Q'+total);
+      showModal('✅','¡Pago Completado!',S.compRow.nombre+'\nAbono anterior: Q'+S.compRow.abono+'\nSaldo cancelado: Q'+S.compRow.saldo+'\nTotal: Q'+total);
       limpiarComp();
     }else msgEl('msg-comp','❌ '+(res.msg||'Error.'),'err');
   }catch(e){msgEl('msg-comp','⚠️ Error de conexión.','err');}
