@@ -610,11 +610,11 @@ var API_URL = "https://script.google.com/macros/s/AKfycbzQs1v9VGFKm6adV0ofaZGj6A
     <div id="comp-list" class="rlist"></div>
     <div id="comp-form" style="display:none">
       <div class="sep"></div>
-      <div class="dcard">
+      <div class="dcard" style="background:#fefce8;border-color:#fde047;">
         <div class="drow"><span class="dlbl">Participante</span><span class="dval" id="comp-nom">—</span></div>
         <div class="drow"><span class="dlbl">Ciclo</span><span class="dval" id="comp-cic">—</span></div>
-        <div class="drow"><span class="dlbl">Abono anterior</span><span class="dval" id="comp-abono">—</span></div>
-        <div class="drow"><span class="dlbl">Saldo pendiente</span><span class="dval" id="comp-saldo">—</span></div>
+        <div class="drow"><span class="dlbl">Abono anterior</span><span class="dval" id="comp-abono" style="color:#854d0e">—</span></div>
+        <div class="drow"><span class="dlbl">Saldo pendiente</span><span class="dval" id="comp-saldo" style="color:#b91c1c;font-weight:800">—</span></div>
       </div>
       <div class="m-inf msg show" style="margin-bottom:10px">ℹ️ Al completar el pago el saldo quedará en Q0.00. El ticket ya fue asignado al registrar el abono.</div>
       <div id="msg-comp" class="msg"></div>
@@ -1242,7 +1242,6 @@ function selectComp(json){
   document.getElementById('comp-q').value=r.nombre;
   setText('comp-nom',r.nombre);setText('comp-cic',r.ciclo||'—');
   setText('comp-abono','Q'+r.abono);setText('comp-saldo','Q'+r.saldo);
-  document.getElementById('comp-tkt').value='';
   clrMsg('msg-comp');
   document.getElementById('comp-form').style.display='block';
 }
