@@ -842,6 +842,9 @@ async function doLogin(){
 }
 function irInicio(){
   S.hist=[];
+  S.evento=null;
+  S.flujo=null;
+  resetCI();
   show('sc-menu');
 }
 function doLogout(){
