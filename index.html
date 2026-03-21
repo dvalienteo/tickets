@@ -181,6 +181,11 @@ h2{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--navy
   padding:6px 11px;cursor:pointer;font-size:.75rem;font-family:'Syne',sans-serif;font-weight:600;
   transition:all .18s var(--ease);}
 .back-btn:hover{background:rgba(255,255,255,.2);color:#fff;}
+.home-btn{display:inline-flex;align-items:center;gap:4px;background:rgba(240,180,41,.25);
+  border:1.5px solid rgba(240,180,41,.5);color:#fef3c7;border-radius:8px;
+  padding:6px 11px;cursor:pointer;font-size:.75rem;font-family:'Syne',sans-serif;font-weight:600;
+  transition:all .18s var(--ease);}
+.home-btn:hover{background:rgba(240,180,41,.45);color:#fff;}
 .res-ev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px;}
 .res-evcard{display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:5px;padding:15px 7px;background:var(--white);border:2px solid var(--g200);
@@ -303,7 +308,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbzQs1v9VGFKm6adV0ofaZGj6A
 <!-- SELECTOR EVENTO -->
 <div id="sc-evento" class="screen">
 <div style="width:100%;max-width:460px">
-  <div class="topbar"><button class="back-btn" onclick="goBack()">← Volver</button></div>
+  <div class="topbar"><button class="back-btn" onclick="goBack()">← Volver</button><button class="home-btn" onclick="irInicio()">🏠 Inicio</button></div>
   <div class="card">
     <div class="sesbar">👤 <strong id="u-ev">—</strong></div>
     <h2 id="ev-h2">Selecciona el Evento</h2>
@@ -323,6 +328,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbzQs1v9VGFKm6adV0ofaZGj6A
 <div style="width:100%;max-width:460px">
   <div class="topbar">
     <button class="back-btn" onclick="goBack()">← Volver</button>
+    <button class="home-btn" onclick="irInicio()">🏠 Inicio</button>
     <span class="ev-tag" id="tag-v">—</span>
   </div>
   <div class="card">
@@ -478,6 +484,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbzQs1v9VGFKm6adV0ofaZGj6A
 <div style="width:100%;max-width:460px">
   <div class="topbar">
     <button class="back-btn" onclick="goBack()">← Volver</button>
+    <button class="home-btn" onclick="irInicio()">🏠 Inicio</button>
     <span class="ev-tag">🎓 Congreso</span>
   </div>
   <div class="card">
@@ -594,6 +601,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbzQs1v9VGFKm6adV0ofaZGj6A
 <div style="width:100%;max-width:460px">
   <div class="topbar">
     <button class="back-btn" onclick="show('sc-congreso')">← Volver</button>
+    <button class="home-btn" onclick="irInicio()">🏠 Inicio</button>
     <span class="ev-tag">💳 Completar Pago</span>
   </div>
   <div class="card">
@@ -632,6 +640,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbzQs1v9VGFKm6adV0ofaZGj6A
 <div style="width:100%;max-width:460px">
   <div class="topbar">
     <button class="back-btn" onclick="goBack()">← Volver</button>
+    <button class="home-btn" onclick="irInicio()">🏠 Inicio</button>
     <span class="ev-tag" id="tag-ci">—</span>
   </div>
   <div class="card">
@@ -694,6 +703,7 @@ var API_URL = "https://script.google.com/macros/s/AKfycbzQs1v9VGFKm6adV0ofaZGj6A
 <div style="width:100%;max-width:820px">
   <div class="topbar">
     <button class="back-btn" onclick="goBack()">← Volver al Menú</button>
+    <button class="home-btn" onclick="irInicio()">🏠 Inicio</button>
     <button class="btn btn-gold" style="padding:6px 13px;font-size:.76rem" onclick="recargarResumen()">🔄 Actualizar</button>
   </div>
   <div class="card wide">
@@ -829,6 +839,10 @@ async function doLogin(){
   }finally{
     btn.disabled=false;btn.innerHTML='ENTRAR AL SISTEMA';
   }
+}
+function irInicio(){
+  S.hist=[];
+  show('sc-menu');
 }
 function doLogout(){
   S={user:null,flujo:null,evento:null,est:null,ciRow:null,hist:[],modo:'est',cmodo:'est',tipoPago:'completo',cEst:null,compRow:null,resumenKey:null,jugador:null,ciTab:'tkt'};
