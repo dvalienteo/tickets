@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Sistema de Tickets — FII</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0a2463;--cobalt:#1a56db;--forest:#1a4731;
+  --gold:#f0b429;--gold-lt:#fef3c7;--crimson:#b91c1c;
+  --white:#ffffff;--g100:#f3f4f6;--g200:#e5e7eb;
+  --g300:#d1d5db;--g400:#9ca3af;--g500:#6b7280;--ink:#0d1b2a;
+  --r-sm:10px;--r-md:16px;--r-lg:22px;
+  --sh-lg:0 12px 48px rgba(10,36,99,.18),0 2px 8px rgba(10,36,99,.1);
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-tap-highlight-color:transparent}
+body{font-family:'Figtree',sans-serif;background:var(--navy);min-height:100vh;color:var(--ink);overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 80% 60% at 20% 10%,rgba(26,86,219,.35) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 80%,rgba(26,71,49,.5) 0%,transparent 60%),
+    linear-gradient(160deg,#0a2463 0%,#0d1b2a 50%,#1a4731 100%);z-index:-1;}
+body::after{content:'';position:fixed;inset:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:28px 28px;z-index:-1;}
+/* Logo fijo esquina superior izquierda */
+.logo-watermark{
+  position:fixed;top:0;left:0;z-index:10;pointer-events:none;
+  padding:10px 14px;}
+.logo-watermark img{
+  height:190px;width:auto;
+  display:block;
+  user-select:none;-webkit-user-drag:none;}
+.screen{display:none;min-height:100vh;padding:20px 16px;padding-top:210px;align-items:center;justify-content:center;flex-direction:column;position:relative;z-index:1;}
+.screen.active{display:flex;}
+.card{background:var(--white);border-radius:var(--r-lg);box-shadow:var(--sh-lg);
+  width:100%;max-width:460px;padding:28px 24px;position:relative;overflow:hidden;
+  animation:slideUp .4s var(--ease) both;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--navy),var(--cobalt),var(--gold));}
+.card.wide{max-width:820px;}
+@keyframes slideUp{from{opacity:0;transform:translateY(24px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.logo-wrap{text-align:center;margin-bottom:18px;}
+.logo-img{display:block;margin:0 auto 10px;max-height:85px;max-width:200px;object-fit:contain;border-radius:8px;}
+h1{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:800;color:var(--navy);line-height:1.1;}
+h2{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--navy);margin-bottom:14px;}
+.tagline{color:var(--g500);font-size:.8rem;margin-top:4px;}
+.sesbar{display:flex;align-items:center;gap:8px;background:#eef2ff;border:1.5px solid #c7d2fe;
+  border-radius:10px;padding:7px 13px;margin-bottom:13px;font-size:.8rem;color:var(--navy);}
+.sesbar strong{font-weight:700;}
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:.67rem;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--g500);margin-bottom:4px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 12px;border:2px solid var(--g200);border-radius:var(--r-sm);
+  font-size:.9rem;font-family:'Figtree',sans-serif;outline:none;
+  transition:border .2s var(--ease),box-shadow .2s var(--ease);
+  background:var(--white);color:var(--ink);-webkit-appearance:none;appearance:none;}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--cobalt);box-shadow:0 0 0 3px rgba(26,86,219,.12);}
+.field input[readonly]{background:var(--g100);color:var(--g500);}
+.field input:disabled,.field select:disabled{background:var(--g100);color:var(--g400);cursor:not-allowed;}
+.input-row{display:flex;gap:7px;}.input-row input{flex:1;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  padding:10px 16px;border:none;border-radius:var(--r-sm);
+  font-family:'Syne',sans-serif;font-size:.85rem;font-weight:700;
+  cursor:pointer;transition:all .2s var(--ease);white-space:nowrap;}
+.btn-navy  {background:var(--navy);color:#fff;width:100%;}
+.btn-navy:hover  {background:var(--cobalt);transform:translateY(-1px);box-shadow:0 5px 18px rgba(26,86,219,.3);}
+.btn-forest{background:var(--forest);color:#fff;width:100%;}
+.btn-forest:hover{filter:brightness(1.15);transform:translateY(-1px);}
+.btn-gold  {background:var(--gold);color:var(--navy);}
+.btn-gold:hover  {filter:brightness(1.08);}
+.btn-amber {background:#f59e0b;color:#fff;width:100%;}
+.btn-amber:hover {filter:brightness(1.1);}
+.btn-purple{background:#7c3aed;color:#fff;width:100%;}
+.btn-purple:hover{filter:brightness(1.1);}
+.btn-green {background:#16a34a;color:#fff;width:100%;}
+.btn-green:hover {filter:brightness(1.1);transform:translateY(-1px);}
+.btn-outline{background:transparent;color:var(--navy);border:2px solid var(--g200);}
+.btn-outline:hover{border-color:var(--navy);background:var(--g100);}
+.btn-soft  {background:var(--g100);color:var(--g500);width:100%;font-size:.8rem;padding:8px;}
+.btn-soft:hover  {background:var(--g200);color:var(--ink);}
+.btn-icon  {background:var(--navy);color:#fff;padding:10px 13px;}
+.btn-icon:hover  {background:var(--cobalt);}
+.btn-full  {width:100%;}
+.btn-link  {background:none;border:none;color:var(--g400);font-size:.78rem;
+  cursor:pointer;font-family:'Figtree',sans-serif;padding:5px 0;text-decoration:underline;}
+.btn-link:hover{color:var(--navy);}
+.btn:disabled{opacity:.4;pointer-events:none;}
+/* Tabs con 3 opciones */
+.modo-tabs{display:flex;gap:7px;margin-bottom:13px;}
+.modo-tabs.tres .modo-tab{font-size:.76rem;padding:9px 5px;}
+.modo-tab{flex:1;padding:9px;border:2px solid var(--g200);border-radius:var(--r-sm);
+  background:var(--white);cursor:pointer;transition:all .2s var(--ease);
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;color:var(--g500);text-align:center;}
+.modo-tab.act-est  {border-color:var(--navy);background:var(--navy);color:#fff;}
+.modo-tab.act-part {border-color:#f59e0b;background:#f59e0b;color:#fff;}
+.modo-tab.act-jug  {border-color:#16a34a;background:#16a34a;color:#fff;}
+.menu-stack{display:flex;flex-direction:column;gap:8px;margin-top:4px;}
+.mcard{display:flex;align-items:center;gap:12px;padding:14px 15px;background:var(--white);
+  border:2px solid var(--g200);border-radius:var(--r-md);cursor:pointer;
+  transition:all .2s var(--ease);text-align:left;width:100%;font-family:inherit;}
+.mcard:hover{border-color:var(--cobalt);box-shadow:0 4px 18px rgba(26,86,219,.12);transform:translateX(4px);}
+.micon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;}
+.mi-b{background:#eff6ff;}.mi-g{background:#ecfdf5;}.mi-y{background:#fffbeb;}
+.mcard h3{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--navy);}
+.mcard p{font-size:.73rem;color:var(--g400);margin-top:2px;}
+.mcard .arrow{margin-left:auto;color:var(--g300);font-size:1rem;transition:transform .2s var(--ease);}
+.mcard:hover .arrow{transform:translateX(4px);color:var(--cobalt);}
+.ev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:4px;}
+@media(max-width:360px){.ev-grid{grid-template-columns:1fr;}}
+.evcard{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:7px;padding:18px 7px;background:var(--white);border:2px solid var(--g200);
+  border-radius:var(--r-md);cursor:pointer;transition:all .22s var(--ease);
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.83rem;color:var(--navy);text-align:center;}
+.evcard:hover{border-color:var(--gold);background:var(--gold-lt);transform:translateY(-3px);box-shadow:0 8px 22px rgba(240,180,41,.2);}
+.evcard .eico{font-size:2rem;line-height:1;}
+.evcard small{font-size:.64rem;font-weight:400;color:var(--g400);font-family:'Figtree',sans-serif;}
+.rlist{margin-top:7px;max-height:180px;overflow-y:auto;border-radius:var(--r-sm);}
+.rlist::-webkit-scrollbar{width:4px;}
+.rlist::-webkit-scrollbar-thumb{background:var(--g200);border-radius:4px;}
+.ritem{display:flex;align-items:center;gap:9px;padding:9px 11px;
+  border:2px solid var(--g200);border-radius:var(--r-sm);margin-bottom:5px;
+  cursor:pointer;transition:all .18s var(--ease);}
+.ritem:hover{border-color:var(--cobalt);background:#f0f6ff;}
+.ritem:last-child{margin-bottom:0;}
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--cobalt));
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:.8rem;flex-shrink:0;}
+.av-g{background:linear-gradient(135deg,#15803d,#16a34a);}
+.rinfo strong{display:block;font-size:.85rem;color:var(--ink);}
+.rinfo small{font-size:.7rem;color:var(--g400);}
+.dcard{background:#f0f6ff;border:2px solid #c7d7fd;border-radius:var(--r-sm);padding:12px;margin:10px 0;}
+.dcard-g{background:#f0fdf4;border:2px solid #bbf7d0;}
+.drow{display:flex;align-items:flex-start;gap:7px;padding:5px 0;border-bottom:1px solid rgba(199,215,253,.5);}
+.dcard-g .drow{border-bottom:1px solid rgba(187,247,208,.5);}
+.drow:last-child{border-bottom:none;padding-bottom:0;}
+.drow:first-child{padding-top:0;}
+.dlbl{font-size:.62rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--g400);min-width:90px;padding-top:3px;flex-shrink:0;}
+.dval{font-weight:600;color:var(--navy);font-size:.85rem;word-break:break-word;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;}
+.bg{background:#d1fae5;color:#065f46;}.br{background:#fee2e2;color:#991b1b;}
+.bb{background:#dbeafe;color:#1e40af;}.by{background:var(--gold-lt);color:#92400e;}
+.bv{background:#f3e8ff;color:#6b21a8;}.bo{background:#fff7ed;color:#9a3412;}
+.bjug{background:#dcfce7;color:#15803d;}
+/* Congreso pago */
+.pago-box{border-radius:var(--r-sm);padding:13px;margin-bottom:12px;}
+.pago-completo{background:#ecfdf5;border:2px solid #a7f3d0;}
+.pago-parcial {background:#fff7ed;border:2px solid #fed7aa;}
+.pago-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;}
+.pago-tab{padding:10px 8px;border:2px solid var(--g200);border-radius:var(--r-sm);
+  background:var(--white);cursor:pointer;transition:all .2s var(--ease);
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:var(--g500);text-align:center;}
+.pago-tab.act-comp{border-color:var(--forest);background:var(--forest);color:#fff;}
+.pago-tab.act-parc{border-color:#f59e0b;background:#fff7ed;color:#92400e;border-width:2px;}
+.monto-badge{display:inline-flex;align-items:center;gap:5px;
+  background:#ecfdf5;border:1.5px solid #a7f3d0;border-radius:8px;
+  padding:6px 12px;font-size:.82rem;font-weight:700;color:#065f46;margin-bottom:10px;}
+.saldo-badge{display:inline-flex;align-items:center;gap:5px;
+  background:#fff7ed;border:1.5px solid #fed7aa;border-radius:8px;
+  padding:6px 12px;font-size:.82rem;font-weight:700;color:#9a3412;margin-bottom:10px;}
+.jug-badge{display:inline-flex;align-items:center;gap:5px;
+  background:#dcfce7;border:1.5px solid #86efac;border-radius:8px;
+  padding:6px 12px;font-size:.82rem;font-weight:700;color:#15803d;margin-bottom:10px;}
+.particular-box{background:#fffbeb;border:2px solid #fcd34d;border-radius:var(--r-sm);padding:13px;margin-bottom:12px;}
+.jug-box{background:#f0fdf4;border:2px solid #86efac;border-radius:var(--r-sm);padding:13px;margin-bottom:12px;}
+.msg{padding:9px 12px;border-radius:var(--r-sm);margin-bottom:10px;font-size:.81rem;font-weight:500;display:none;}
+.msg.show{display:block;}
+.m-ok {background:#d1fae5;color:#065f46;border:1.5px solid #a7f3d0;}
+.m-err{background:#fee2e2;color:#991b1b;border:1.5px solid #fca5a5;}
+.m-inf{background:#dbeafe;color:#1e40af;border:1.5px solid #bfdbfe;}
+.topbar{width:100%;max-width:820px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.ev-tag{background:var(--gold);color:var(--navy);font-family:'Syne',sans-serif;font-weight:700;padding:4px 12px;border-radius:20px;font-size:.73rem;}
+.back-btn{display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.12);
+  border:1.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);border-radius:8px;
+  padding:6px 11px;cursor:pointer;font-size:.75rem;font-family:'Syne',sans-serif;font-weight:600;
+  transition:all .18s var(--ease);}
+.back-btn:hover{background:rgba(255,255,255,.2);color:#fff;}
+.res-ev-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:16px;}
+.res-evcard{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:5px;padding:15px 7px;background:var(--white);border:2px solid var(--g200);
+  border-radius:var(--r-md);cursor:pointer;transition:all .22s var(--ease);
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:var(--navy);text-align:center;}
+.res-evcard:hover{border-color:var(--cobalt);background:#eff6ff;}
+.res-evcard.activo{border-color:var(--cobalt);background:var(--cobalt);color:#fff;}
+.res-evcard .eico{font-size:1.7rem;line-height:1;}
+.rev-wrap{border-radius:var(--r-md);overflow:hidden;border:2px solid var(--g200);}
+.rev-head{background:linear-gradient(90deg,var(--navy),var(--cobalt));padding:10px 14px;display:flex;align-items:center;gap:9px;}
+.rev-head h3{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:#fff;}
+.rev-cnt{margin-left:auto;background:rgba(255,255,255,.15);border-radius:20px;padding:3px 10px;font-size:.7rem;font-weight:600;color:rgba(255,255,255,.9);}
+table{width:100%;border-collapse:collapse;}
+th{background:var(--g100);font-size:.63rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--g500);padding:8px 12px;text-align:left;border-bottom:2px solid var(--g200);}
+td{padding:8px 12px;border-bottom:1px solid var(--g100);font-size:.81rem;}
+tr:last-child td{border-bottom:none;}
+.tr-tot td{font-weight:700;color:var(--navy);background:#f0f6ff;border-top:2px solid #c7d7fd;}
+.tr-jug td{font-weight:700;color:#15803d;background:#f0fdf4;border-top:2px solid #86efac;}
+.num{text-align:center;}
+.num-val{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:22px;border-radius:5px;font-weight:700;font-size:.8rem;}
+.nv-b{background:#eff6ff;color:var(--cobalt);}.nv-g{background:#ecfdf5;color:var(--forest);}
+.nv-grn{background:#dcfce7;color:#15803d;}
+.sep{height:1px;background:var(--g100);margin:12px 0;}
+/* Sección A/B */
+.seccion-wrap{margin-bottom:12px;}
+.seccion-wrap label.sec-lbl{display:block;font-size:.67rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--g500);margin-bottom:6px;}
+.sec-opts{display:flex;gap:8px;}
+.sec-opt{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 10px;border:2px solid var(--g200);border-radius:var(--r-sm);cursor:pointer;transition:all .18s var(--ease);font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:var(--g500);}
+.sec-opt input[type=radio]{display:none;}
+.sec-opt.sel-A{border-color:var(--cobalt);background:#eff6ff;color:var(--cobalt);}
+.sec-opt.sel-B{border-color:#7c3aed;background:#f3e8ff;color:#7c3aed;}
+.spin{display:inline-block;width:14px;height:14px;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:rot .65s linear infinite;}
+@keyframes rot{to{transform:rotate(360deg);}}
+.empty{text-align:center;color:var(--g400);padding:18px;font-size:.81rem;font-style:italic;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,36,99,.55);
+  backdrop-filter:blur(4px);z-index:1000;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--white);border-radius:var(--r-lg);padding:28px 24px;max-width:340px;width:100%;
+  text-align:center;animation:slideUp .3s var(--ease) both;box-shadow:var(--sh-lg);}
+.modal-ico{font-size:2.6rem;margin-bottom:9px;line-height:1;}
+.modal-tit{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:var(--navy);margin-bottom:6px;}
+.modal-txt{color:var(--g500);font-size:.82rem;margin-bottom:16px;line-height:1.5;white-space:pre-line;}
+.modal-box .btn-navy{max-width:160px;margin:0 auto;}
+/* Check-in tabs */
+.ci-tabs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:13px;}
+.ci-tab{padding:9px 8px;border:2px solid var(--g200);border-radius:var(--r-sm);
+  background:var(--white);cursor:pointer;transition:all .2s var(--ease);
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:var(--g500);text-align:center;}
+.ci-tab.act{border-color:var(--navy);background:var(--navy);color:#fff;}
+@supports(padding:max(0px)){.screen{padding-bottom:max(20px,env(safe-area-inset-bottom));}}
+@media(max-width:480px){.card{padding:20px 14px;}h1{font-size:1.25rem;}.dlbl{min-width:78px;}.ev-grid{gap:6px;}.logo-watermark img{height:120px;}.screen{padding-top:140px;}}
+</style>
+</head>
+<body>
+<!-- Marca de agua logo -->
+<div class="logo-watermark">
+  <img src="https://i.ibb.co/Kx7c7gDZ/01-Logo-2026-3.png" alt="" aria-hidden="true">
+</div>
+<script>
+var API_URL = "https://script.google.com/macros/s/AKfycbzQs1v9VGFKm6adV0ofaZGj6Ax-7abC31d9kg2lfzPXm4i_ikevpdyCiizqhkH0OdmrLQ/exec";
+</script>
+
+<!-- MODAL -->
+<div id="modal" class="modal-overlay">
+  <div class="modal-box">
+    <div id="modal-ico" class="modal-ico">✅</div>
+    <div id="modal-tit" class="modal-tit"></div>
+    <p   id="modal-txt" class="modal-txt"></p>
+    <button class="btn btn-navy" onclick="closeModal()">Entendido</button>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="sc-login" class="screen active">
+<div class="card">
+  <div class="logo-wrap">
+    <img src="https://i.ibb.co/Kx7c7gDZ/01-Logo-2026-3.png" class="logo-img" alt="Logo FII" onerror="this.style.display='none'">
+    <h1>Sistema de Tickets</h1>
+    <p class="tagline">Facultad de Ingeniería Industrial</p>
+  </div>
+  <div id="msg-login" class="msg"></div>
+  <div class="field">
+    <label>PIN de Acceso</label>
+    <input type="password" id="inp-pin" placeholder="Ingresa tu PIN…"
+           maxlength="30" onkeydown="if(event.key==='Enter')doLogin()">
+  </div>
+  <button class="btn btn-navy" id="btn-login" onclick="doLogin()">ENTRAR AL SISTEMA</button>
+</div>
+</div>
+
+<!-- MENÚ -->
+<div id="sc-menu" class="screen">
+<div class="card">
+  <div class="logo-wrap" style="margin-bottom:8px">
+    <img src="https://i.ibb.co/Kx7c7gDZ/01-Logo-2026-3.png" class="logo-img" alt="Logo FII" onerror="this.style.display='none'">
+  </div>
+  <div class="sesbar">👤 Hola, <strong id="u-menu">—</strong></div>
+  <div class="menu-stack">
+    <button class="mcard" onclick="goTo('venta')">
+      <div class="micon mi-b">🎟️</div>
+      <div><h3>Registrar Venta</h3><p>Asignar ticket a un participante</p></div>
+      <span class="arrow">›</span>
+    </button>
+    <button class="mcard" onclick="goTo('checkin')">
+      <div class="micon mi-g">✅</div>
+      <div><h3>Realizar Check-in</h3><p>Registrar ingreso al evento</p></div>
+      <span class="arrow">›</span>
+    </button>
+    <button class="mcard" onclick="goTo('resumen')">
+      <div class="micon mi-y">📊</div>
+      <div><h3>Ver Resumen</h3><p>Estadísticas por evento</p></div>
+      <span class="arrow">›</span>
+    </button>
+  </div>
+  <div class="sep"></div>
+  <button class="btn btn-soft" onclick="doLogout()">🚪 Cerrar Sesión</button>
+</div>
+</div>
+
+<!-- SELECTOR EVENTO -->
+<div id="sc-evento" class="screen">
+<div style="width:100%;max-width:460px">
+  <div class="topbar"><button class="back-btn" onclick="goBack()">← Volver</button></div>
+  <div class="card">
+    <div class="sesbar">👤 <strong id="u-ev">—</strong></div>
+    <h2 id="ev-h2">Selecciona el Evento</h2>
+    <p class="tagline" style="margin-bottom:14px">Elige el evento en el que deseas trabajar</p>
+    <div class="ev-grid">
+      <button class="evcard" onclick="pickEvent('partido3')"><span class="eico">⚽</span><span>Fútbol 3</span><small>Evento 2</small></button>
+      <button class="evcard" onclick="pickEvent('bingo')"><span class="eico">🎱</span><span>Bingo</span><small>Evento 3</small></button>
+      <button class="evcard" onclick="pickEvent('congreso')"><span class="eico">🎓</span><span>Congreso</span><small>Evento 4</small></button>
+    </div>
+    <button class="btn-link btn-full" style="text-align:center;margin-top:12px" onclick="goBack()">Volver al Menú</button>
+  </div>
+</div>
+</div>
+
+<!-- VENTA PARTIDO3 / BINGO -->
+<div id="sc-venta" class="screen">
+<div style="width:100%;max-width:460px">
+  <div class="topbar">
+    <button class="back-btn" onclick="goBack()">← Volver</button>
+    <span class="ev-tag" id="tag-v">—</span>
+  </div>
+  <div class="card">
+    <div class="sesbar">👤 <strong id="u-v">—</strong></div>
+    <h2>🎟️ Registrar Venta</h2>
+
+    <!-- Tabs: Partido3 muestra 3 opciones, Bingo solo 2 -->
+    <div class="modo-tabs" id="tabs-venta">
+      <div id="tab-est"  class="modo-tab act-est"  onclick="setModo('est')">👤 Estudiante / Docente</div>
+      <div id="tab-part" class="modo-tab"           onclick="setModo('part')">🏷️ Particular</div>
+      <div id="tab-jug"  class="modo-tab"           onclick="setModo('jug')" style="display:none">⚽ Jugador</div>
+    </div>
+
+    <!-- MODO ESTUDIANTE/DOCENTE -->
+    <div id="modo-est">
+      <div class="field">
+        <label>Buscar por Nombre o Apellido</label>
+        <div class="input-row">
+          <input type="text" id="v-q" placeholder="Escribe para buscar…"
+                 oninput="liveSearch()" onkeydown="if(event.key==='Enter')doSearch()">
+          <button class="btn btn-icon" onclick="doSearch()">🔍</button>
+        </div>
+      </div>
+      <div id="v-list" class="rlist"></div>
+      <div id="v-form-est" style="display:none">
+        <div class="sep"></div>
+        <div class="dcard">
+          <div class="drow"><span class="dlbl">Participante</span><span class="dval" id="v-nom">—</span></div>
+          <div class="drow"><span class="dlbl">Ciclo / Categ.</span><span class="dval" id="v-cic-disp">—</span></div>
+        </div>
+        <div id="v-cic-wrap" class="field" style="display:none">
+          <label>Asignar Ciclo / Categoría</label>
+          <select id="v-cic" onchange="mostrarSeccion('v',this.value)">
+            <option value="">— Seleccionar —</option>
+            <option>Primero</option><option>Tercero</option><option>Quinto</option>
+            <option>Septimo</option><option>Noveno</option><option>Docente</option>
+          </select>
+        </div>
+        <!-- Sección A/B — solo para estudiantes (no docentes) -->
+        <div id="v-sec-wrap" class="seccion-wrap" style="display:none">
+          <label class="sec-lbl">Sección</label>
+          <div class="sec-opts">
+            <label class="sec-opt" id="v-sec-a" onclick="setSeccion('v','A')">
+              <input type="radio" name="v-sec" value="A"> Sección A
+            </label>
+            <label class="sec-opt" id="v-sec-b" onclick="setSeccion('v','B')">
+              <input type="radio" name="v-sec" value="B"> Sección B
+            </label>
+          </div>
+        </div>
+        <div class="field">
+          <label>No. de Ticket</label>
+          <input type="text" id="v-tkt" placeholder="Ej. 025" onkeydown="if(event.key==='Enter')saveVentaEst()">
+        </div>
+        <div id="msg-v" class="msg"></div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <button class="btn btn-navy" id="btn-v" onclick="saveVentaEst()">REGISTRAR VENTA</button>
+          <button class="btn btn-soft" onclick="limpiarEst()">🗑️ Limpiar campos</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODO PARTICULAR -->
+    <div id="modo-part" style="display:none">
+      <div class="particular-box">
+        <div class="field" style="margin-bottom:9px">
+          <label>Nombre Completo</label>
+          <input type="text" id="p-nombre" placeholder="Nombre del particular…">
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>No. de Ticket</label>
+          <input type="text" id="p-ticket" placeholder="Ej. 099" onkeydown="if(event.key==='Enter')saveVentaPart()">
+        </div>
+      </div>
+      <div id="msg-p" class="msg"></div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn btn-amber" id="btn-p" onclick="saveVentaPart()">REGISTRAR PARTICULAR</button>
+        <button class="btn btn-soft" onclick="limpiarPart()">🗑️ Limpiar campos</button>
+      </div>
+    </div>
+
+    <!-- MODO JUGADOR (solo Partido3) -->
+    <div id="modo-jug" style="display:none">
+      <div class="jug-badge">⚽ Solo estudiantes del LISTADO2026 pueden ser jugadores</div>
+      <div class="field">
+        <label>Buscar Jugador por Nombre o Apellido</label>
+        <div class="input-row">
+          <input type="text" id="jug-q" placeholder="Escribe para buscar…"
+                 oninput="liveSearchJug()" onkeydown="if(event.key==='Enter')doSearchJug()">
+          <button class="btn btn-icon" onclick="doSearchJug()">🔍</button>
+        </div>
+      </div>
+      <div id="jug-list" class="rlist"></div>
+      <div id="jug-form" style="display:none">
+        <div class="sep"></div>
+        <div class="dcard dcard-g">
+          <div class="drow"><span class="dlbl">Jugador</span><span class="dval" id="jug-nom">—</span></div>
+          <div class="drow"><span class="dlbl">Ciclo / Categ.</span><span class="dval" id="jug-cic-disp">—</span></div>
+        </div>
+        <div id="jug-cic-wrap" class="field" style="display:none">
+          <label>Asignar Ciclo / Categoría</label>
+          <select id="jug-cic" onchange="mostrarSeccion('jug',this.value)">
+            <option value="">— Seleccionar —</option>
+            <option>Primero</option><option>Tercero</option><option>Quinto</option>
+            <option>Septimo</option><option>Noveno</option><option>Docente</option>
+          </select>
+        </div>
+        <div class="jug-box">
+          <!-- Selector de equipo -->
+          <div class="field" style="margin-bottom:10px">
+            <label>Equipo</label>
+            <div class="sec-opts">
+              <label class="sec-opt" id="jug-eq-a" onclick="setEquipo('A')"><input type="radio" name="jug-eq" value="A"> Equipo A</label>
+              <label class="sec-opt" id="jug-eq-b" onclick="setEquipo('B')"><input type="radio" name="jug-eq" value="B"> Equipo B</label>
+              <label class="sec-opt" id="jug-eq-c" onclick="setEquipo('C')"><input type="radio" name="jug-eq" value="C"> Equipo C</label>
+              <label class="sec-opt" id="jug-eq-d" onclick="setEquipo('D')"><input type="radio" name="jug-eq" value="D"> Equipo D</label>
+            </div>
+          </div>
+          <!-- Código generado -->
+          <div class="field" style="margin-bottom:8px">
+            <label>Código de Jugador <span id="jug-cod-hint" style="color:var(--g400);font-weight:400;text-transform:none;font-size:.7rem"></span></label>
+            <input type="text" id="jug-codigo" placeholder="Selecciona un equipo primero…"
+                   style="text-transform:uppercase;font-weight:700;letter-spacing:.05em"
+                   onkeydown="if(event.key==='Enter')saveJugador()">
+          </div>
+          <!-- Sección A/B para jugadores -->
+          <div class="seccion-wrap" style="margin-bottom:0">
+            <label class="sec-lbl">Sección</label>
+            <div class="sec-opts">
+              <label class="sec-opt" id="jug-sec-a" onclick="setSeccion('jug','A')">
+                <input type="radio" name="jug-sec" value="A"> Sección A
+              </label>
+              <label class="sec-opt" id="jug-sec-b" onclick="setSeccion('jug','B')">
+                <input type="radio" name="jug-sec" value="B"> Sección B
+              </label>
+            </div>
+          </div>
+        </div>
+        <div id="msg-jug" class="msg"></div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <button class="btn btn-green" id="btn-jug" onclick="saveJugador()">⚽ REGISTRAR JUGADOR</button>
+          <button class="btn btn-soft" onclick="limpiarJug()">🗑️ Limpiar campos</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- VENTA CONGRESO -->
+<div id="sc-congreso" class="screen">
+<div style="width:100%;max-width:460px">
+  <div class="topbar">
+    <button class="back-btn" onclick="goBack()">← Volver</button>
+    <span class="ev-tag">🎓 Congreso</span>
+  </div>
+  <div class="card">
+    <div class="sesbar">👤 <strong id="u-cong">—</strong></div>
+    <h2>🎟️ Venta — Congreso</h2>
+    <div class="modo-tabs">
+      <div id="ctab-est" class="modo-tab act-est" onclick="setCModo('est')">👤 Est. / Docente</div>
+      <div id="ctab-part" class="modo-tab" onclick="setCModo('part')">🏷️ Particular</div>
+    </div>
+    <!-- Modo EST/DOC -->
+    <div id="cmodo-est">
+      <div class="field">
+        <label>Buscar Participante</label>
+        <div class="input-row">
+          <input type="text" id="cq" placeholder="Nombre o apellido…"
+                 oninput="liveCSearch()" onkeydown="if(event.key==='Enter')doCSearch()">
+          <button class="btn btn-icon" onclick="doCSearch()">🔍</button>
+        </div>
+      </div>
+      <div id="c-list" class="rlist"></div>
+      <div id="c-form-est" style="display:none">
+        <div class="sep"></div>
+        <div class="dcard">
+          <div class="drow"><span class="dlbl">Participante</span><span class="dval" id="c-nom">—</span></div>
+          <div class="drow"><span class="dlbl">Ciclo / Categ.</span><span class="dval" id="c-cic-disp">—</span></div>
+        </div>
+        <div id="c-cic-wrap" class="field" style="display:none">
+          <label>Asignar Ciclo</label>
+          <select id="c-cic" onchange="mostrarSeccion('c',this.value)">
+            <option value="">— Seleccionar —</option>
+            <option>Primero</option><option>Tercero</option><option>Quinto</option>
+            <option>Septimo</option><option>Noveno</option><option>Docente</option>
+          </select>
+        </div>
+        <!-- Sección A/B — solo estudiantes -->
+        <div id="c-sec-wrap" class="seccion-wrap" style="display:none">
+          <label class="sec-lbl">Sección</label>
+          <div class="sec-opts">
+            <label class="sec-opt" id="c-sec-a" onclick="setSeccion('c','A')">
+              <input type="radio" name="c-sec" value="A"> Sección A
+            </label>
+            <label class="sec-opt" id="c-sec-b" onclick="setSeccion('c','B')">
+              <input type="radio" name="c-sec" value="B"> Sección B
+            </label>
+          </div>
+        </div>
+        <div class="pago-tabs">
+          <div id="ptab-comp" class="pago-tab act-comp" onclick="setPago('completo')">✅ Pago Completo<br><small style="font-weight:400">Q250.00</small></div>
+          <div id="ptab-parc" class="pago-tab" onclick="setPago('parcial')">📋 Pago Parcial<br><small style="font-weight:400">Abono</small></div>
+        </div>
+        <div id="pago-completo-box">
+          <div class="monto-badge">💰 Monto: Q250.00</div>
+          <div class="field">
+            <label>No. de Ticket</label>
+            <input type="text" id="c-tkt-comp" placeholder="Ej. 025">
+          </div>
+        </div>
+        <div id="pago-parcial-box" style="display:none">
+          <div class="saldo-badge">⚠️ Pago parcial — saldo pendiente de Q250.00</div>
+          <div class="field">
+            <label>No. de Ticket</label>
+            <input type="text" id="c-tkt-parc" placeholder="Ej. 025">
+          </div>
+          <div class="field">
+            <label>Monto de Abono (Q)</label>
+            <input type="number" id="c-abono" placeholder="Ej. 100" min="1" max="249">
+          </div>
+          <div id="c-saldo-preview" style="display:none;margin-bottom:10px"></div>
+        </div>
+        <div class="two-col">
+          <div class="field"><label>Correo</label><input type="email" id="c-correo-est" placeholder="correo@gmail.com"></div>
+          <div class="field"><label>Teléfono</label><input type="tel" id="c-tel-est" placeholder="5555-1234"></div>
+        </div>
+        <div id="msg-cest" class="msg"></div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <button class="btn btn-navy" id="btn-cest" onclick="saveCEst()">REGISTRAR VENTA</button>
+          <button class="btn btn-soft" onclick="limpiarCEst()">🗑️ Limpiar campos</button>
+        </div>
+      </div>
+    </div>
+    <!-- Modo PARTICULAR -->
+    <div id="cmodo-part" style="display:none">
+      <div class="particular-box">
+        <div class="field" style="margin-bottom:9px">
+          <label>Nombre Completo</label>
+          <input type="text" id="cp-nombre" placeholder="Nombre del particular…">
+        </div>
+        <div class="monto-badge" style="margin-top:4px">💰 Monto: Q275.00 (Pago Completo)</div>
+        <div class="field" style="margin:9px 0 9px">
+          <label>No. de Ticket</label>
+          <input type="text" id="cp-ticket" placeholder="Ej. 099">
+        </div>
+        <div class="two-col">
+          <div class="field" style="margin-bottom:0"><label>Correo</label><input type="email" id="cp-correo" placeholder="correo@gmail.com"></div>
+          <div class="field" style="margin-bottom:0"><label>Teléfono</label><input type="tel" id="cp-tel" placeholder="5555-1234"></div>
+        </div>
+      </div>
+      <div id="msg-cpart" class="msg"></div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn btn-amber" id="btn-cpart" onclick="saveCPart()">REGISTRAR PARTICULAR</button>
+        <button class="btn btn-soft" onclick="limpiarCPart()">🗑️ Limpiar campos</button>
+      </div>
+    </div>
+    <div class="sep"></div>
+    <button class="btn btn-purple btn-full" onclick="show('sc-completar')">
+      💳 Completar Pago Pendiente
+    </button>
+  </div>
+</div>
+</div>
+
+<!-- COMPLETAR PAGO CONGRESO -->
+<div id="sc-completar" class="screen">
+<div style="width:100%;max-width:460px">
+  <div class="topbar">
+    <button class="back-btn" onclick="show('sc-congreso')">← Volver</button>
+    <span class="ev-tag">💳 Completar Pago</span>
+  </div>
+  <div class="card">
+    <div class="sesbar">👤 <strong id="u-comp">—</strong></div>
+    <h2>💳 Completar Pago — Congreso</h2>
+    <div class="field">
+      <label>Buscar Estudiante con Saldo Pendiente</label>
+      <div class="input-row">
+        <input type="text" id="comp-q" placeholder="Nombre o apellido…"
+               oninput="liveCompSearch()" onkeydown="if(event.key==='Enter')doCompSearch()">
+        <button class="btn btn-icon" onclick="doCompSearch()">🔍</button>
+      </div>
+    </div>
+    <div id="comp-list" class="rlist"></div>
+    <div id="comp-form" style="display:none">
+      <div class="sep"></div>
+      <div class="dcard">
+        <div class="drow"><span class="dlbl">Participante</span><span class="dval" id="comp-nom">—</span></div>
+        <div class="drow"><span class="dlbl">Ciclo</span><span class="dval" id="comp-cic">—</span></div>
+        <div class="drow"><span class="dlbl">Abono anterior</span><span class="dval" id="comp-abono">—</span></div>
+        <div class="drow"><span class="dlbl">Saldo pendiente</span><span class="dval" id="comp-saldo">—</span></div>
+      </div>
+      <div class="m-inf msg show" style="margin-bottom:10px">ℹ️ Al completar el pago el saldo quedará en Q0.00. El ticket ya fue asignado al registrar el abono.</div>
+      <div id="msg-comp" class="msg"></div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <button class="btn btn-forest" id="btn-comp" onclick="doCompletar()">✅ COMPLETAR PAGO</button>
+        <button class="btn btn-soft" onclick="limpiarComp()">🗑️ Limpiar</button>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- CHECK-IN -->
+<div id="sc-ci" class="screen">
+<div style="width:100%;max-width:460px">
+  <div class="topbar">
+    <button class="back-btn" onclick="goBack()">← Volver</button>
+    <span class="ev-tag" id="tag-ci">—</span>
+  </div>
+  <div class="card">
+    <div class="sesbar">👤 <strong id="u-ci">—</strong></div>
+    <h2>✅ Realizar Check-in</h2>
+
+    <!-- Tabs: por ticket o por nombre -->
+    <div class="ci-tabs">
+      <div id="ci-tab-tkt"  class="ci-tab act" onclick="setCITab('tkt')">🎟️ Por Ticket / Código</div>
+      <div id="ci-tab-nom"  class="ci-tab"     onclick="setCITab('nom')">👤 Por Nombre</div>
+    </div>
+
+    <!-- Búsqueda por ticket/código -->
+    <div id="ci-modo-tkt">
+      <div class="field">
+        <label id="ci-tkt-label">No. de Ticket o Código Jugador</label>
+        <div class="input-row">
+          <input type="text" id="ci-tkt" placeholder="Ej. 025 o J-1…"
+                 style="text-transform:uppercase"
+                 onkeydown="if(event.key==='Enter')searchTicket()">
+          <button class="btn btn-icon" onclick="searchTicket()">🔍</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Búsqueda por nombre -->
+    <div id="ci-modo-nom" style="display:none">
+      <div class="field">
+        <label>Nombre del Asistente / Jugador</label>
+        <div class="input-row">
+          <input type="text" id="ci-nom-q" placeholder="Nombre o apellido…"
+                 oninput="liveCINomSearch()" onkeydown="if(event.key==='Enter')doCINomSearch()">
+          <button class="btn btn-icon" onclick="doCINomSearch()">🔍</button>
+        </div>
+      </div>
+      <div id="ci-nom-list" class="rlist"></div>
+    </div>
+
+    <!-- Resultado check-in -->
+    <div id="ci-res" style="display:none">
+      <div class="dcard" id="ci-dcard">
+        <div class="drow"><span class="dlbl">Participante</span><span class="dval" id="ci-nom-val">—</span></div>
+        <div class="drow"><span class="dlbl">Ciclo / Categ.</span><span class="dval" id="ci-cic">—</span></div>
+        <div class="drow"><span class="dlbl" id="ci-code-lbl">No. de Ticket</span><span class="dval" id="ci-num">—</span></div>
+        <div class="drow" id="ci-prev-row" style="display:none">
+          <span class="dlbl">Check-in</span><span class="dval" id="ci-prev">—</span>
+        </div>
+      </div>
+      <div id="msg-ci" class="msg"></div>
+      <button class="btn btn-forest" id="btn-ci" onclick="doCheckin()">✅ REGISTRAR CHECK-IN</button>
+    </div>
+    <div class="sep"></div>
+    <button class="btn btn-soft" onclick="resetCI()">🗑️ Limpiar</button>
+  </div>
+</div>
+</div>
+
+<!-- RESUMEN -->
+<div id="sc-res" class="screen">
+<div style="width:100%;max-width:820px">
+  <div class="topbar">
+    <button class="back-btn" onclick="goBack()">← Volver al Menú</button>
+    <button class="btn btn-gold" style="padding:6px 13px;font-size:.76rem" onclick="recargarResumen()">🔄 Actualizar</button>
+  </div>
+  <div class="card wide">
+    <div class="sesbar" style="margin-bottom:14px">👤 <strong id="u-res">—</strong></div>
+    <h2 style="margin-bottom:12px">📊 Resumen — Elige el Evento</h2>
+    <div class="res-ev-grid">
+      <div class="res-evcard" id="rev-partido3" onclick="verResumen('partido3')"><span class="eico">⚽</span><span>Fútbol 3</span></div>
+      <div class="res-evcard" id="rev-bingo"    onclick="verResumen('bingo')"   ><span class="eico">🎱</span><span>Bingo</span></div>
+      <div class="res-evcard" id="rev-congreso" onclick="verResumen('congreso')"><span class="eico">🎓</span><span>Congreso</span></div>
+    </div>
+    <div id="res-body"><p class="empty">Selecciona un evento para ver el resumen.</p></div>
+  </div>
+</div>
+</div>
+
+<script>
+"use strict";
+var S = {
+  user:null, flujo:null, evento:null, est:null, ciRow:null,
+  hist:[], modo:'est', cmodo:'est', tipoPago:'completo',
+  cEst:null, compRow:null, resumenKey:null,
+  jugador:null, ciTab:'tkt'
+};
+var EV_NOMBRES = {partido3:'⚽ Fútbol 3', bingo:'🎱 Bingo', congreso:'🎓 Congreso'};
+var ORDEN = ['Primero','Tercero','Quinto','Septimo','Noveno','Docente','Particular'];
+
+/* ── MODAL ── */
+function showModal(ico,tit,txt){
+  document.getElementById('modal-ico').textContent=ico;
+  document.getElementById('modal-tit').textContent=tit;
+  document.getElementById('modal-txt').textContent=txt;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+
+/* ── UTILS ── */
+function msgEl(id,txt,tipo){
+  var el=document.getElementById(id);if(!el)return;
+  el.textContent=txt;
+  el.className='msg show m-'+(tipo==='ok'?'ok':tipo==='inf'?'inf':'err');
+}
+function clrMsg(id){var el=document.getElementById(id);if(el)el.className='msg';}
+function setText(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ── API ── */
+async function apiGet(params){
+  var qs=Object.keys(params).map(k=>k+'='+encodeURIComponent(params[k])).join('&');
+  var r=await fetch(API_URL+'?'+qs,{redirect:'follow'});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+async function apiPost(body){
+  var r=await fetch(API_URL,{
+    method:'POST',redirect:'follow',
+    headers:{'Content-Type':'text/plain;charset=utf-8'},
+    body:JSON.stringify(body)
+  });
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+
+/* ── NAVEGACIÓN ── */
+function goTo(flujo){
+  S.flujo=flujo; S.hist.push('menu');
+  if(flujo==='resumen'){
+    setText('u-res',S.user.nombre);
+    S.resumenKey=null;
+    document.querySelectorAll('.res-evcard').forEach(c=>c.classList.remove('activo'));
+    document.getElementById('res-body').innerHTML='<p class="empty">Selecciona un evento para ver el resumen.</p>';
+    show('sc-res');
+  } else {
+    document.getElementById('ev-h2').textContent=
+      flujo==='venta'?'🎟️ Venta — Elige Evento':'✅ Check-in — Elige Evento';
+    setText('u-ev',S.user.nombre);
+    show('sc-evento');
+  }
+}
+function pickEvent(key){
+  S.evento=key; S.hist.push('evento');
+  if(S.flujo==='venta'){
+    if(key==='congreso'){
+      limpiarCEst(); limpiarCPart(); setCModo('est');
+      setText('u-cong',S.user.nombre);
+      setText('u-comp',S.user.nombre);
+      show('sc-congreso');
+    } else {
+      limpiarEst(); limpiarPart(); limpiarJug();
+      setModo('est');
+      setText('tag-v',EV_NOMBRES[key]);
+      setText('u-v',S.user.nombre);
+      // Mostrar/ocultar tab jugador solo en partido3
+      document.getElementById('tab-jug').style.display = key==='partido3' ? '' : 'none';
+      // Ajustar tamaño de tabs
+      var tabs=document.getElementById('tabs-venta');
+      tabs.className = key==='partido3' ? 'modo-tabs tres' : 'modo-tabs';
+      show('sc-venta');
+    }
+  } else {
+    resetCI();
+    setCITab('tkt');
+    setText('tag-ci',EV_NOMBRES[key]);
+    setText('u-ci',S.user.nombre);
+    show('sc-ci');
+  }
+}
+function goBack(){
+  var prev=S.hist.pop();
+  if(!prev||prev==='menu')show('sc-menu');
+  else show('sc-evento');
+}
+
+/* ── LOGIN ── */
+async function doLogin(){
+  var pin=document.getElementById('inp-pin').value.trim();
+  if(!pin){msgEl('msg-login','Ingresa tu PIN.','err');return;}
+  var btn=document.getElementById('btn-login');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Verificando…';
+  try{
+    var res=await apiGet({action:'login',pin:pin});
+    if(res.ok){
+      S.user={nombre:res.nombre,pin:pin};
+      setText('u-menu',res.nombre);clrMsg('msg-login');show('sc-menu');
+    }else{
+      msgEl('msg-login','❌ '+(res.msg||'PIN incorrecto.'),'err');
+    }
+  }catch(e){
+    msgEl('msg-login','⚠️ Error de conexión con el servidor.','err');
+  }finally{
+    btn.disabled=false;btn.innerHTML='ENTRAR AL SISTEMA';
+  }
+}
+function doLogout(){
+  S={user:null,flujo:null,evento:null,est:null,ciRow:null,hist:[],modo:'est',cmodo:'est',tipoPago:'completo',cEst:null,compRow:null,resumenKey:null,jugador:null,ciTab:'tkt'};
+  document.getElementById('inp-pin').value='';
+  clrMsg('msg-login');show('sc-login');
+}
+
+/* ── SECCIÓN A/B ── */
+function setSeccion(prefix, val){
+  var a=document.getElementById(prefix+'-sec-a');
+  var b=document.getElementById(prefix+'-sec-b');
+  if(!a||!b)return;
+  a.className='sec-opt'+(val==='A'?' sel-A':'');
+  b.className='sec-opt'+(val==='B'?' sel-B':'');
+  // marcar radio internamente
+  a.querySelector('input').checked=(val==='A');
+  b.querySelector('input').checked=(val==='B');
+}
+function getSeccion(prefix){
+  var el=document.querySelector('input[name="'+prefix+'-sec"]:checked');
+  return el?el.value:'';
+}
+function resetSeccion(prefix){
+  var a=document.getElementById(prefix+'-sec-a');
+  var b=document.getElementById(prefix+'-sec-b');
+  if(a){a.className='sec-opt';a.querySelector('input').checked=false;}
+  if(b){b.className='sec-opt';b.querySelector('input').checked=false;}
+}
+function mostrarSeccion(prefix, ciclo){
+  // Solo mostrar para ciclos que no sean Docente ni Particular
+  var wrap=document.getElementById(prefix+'-sec-wrap');
+  if(!wrap)return;
+  var esDo=(ciclo==='Docente'||ciclo==='Particular'||ciclo==='');
+  wrap.style.display=esDo?'none':'block';
+  if(esDo)resetSeccion(prefix);
+}
+
+/* ── MODO VENTA ── */
+function setModo(m){
+  S.modo=m;
+  document.getElementById('tab-est').className ='modo-tab'+(m==='est'?' act-est':'');
+  document.getElementById('tab-part').className ='modo-tab'+(m==='part'?' act-part':'');
+  document.getElementById('tab-jug').className  ='modo-tab'+(m==='jug'?' act-jug':'');
+  document.getElementById('modo-est').style.display =m==='est'?'block':'none';
+  document.getElementById('modo-part').style.display=m==='part'?'block':'none';
+  document.getElementById('modo-jug').style.display =m==='jug'?'block':'none';
+}
+
+/* ── BÚSQUEDA EST/DOC ── */
+var _tmr=null;
+function liveSearch(){clearTimeout(_tmr);_tmr=setTimeout(doSearch,350);}
+async function doSearch(){
+  var q=document.getElementById('v-q').value.trim();
+  var list=document.getElementById('v-list');
+  if(q.length<2){list.innerHTML='';document.getElementById('v-form-est').style.display='none';return;}
+  list.innerHTML='<p class="empty">Buscando…</p>';
+  try{
+    var res=await apiGet({action:'buscar',q:q});
+    var arr=res.resultados||[];
+    if(!arr.length){list.innerHTML='<p class="empty">Sin resultados para "'+q+'"</p>';return;}
+    list.innerHTML=arr.map(r=>{
+      var ini=r.nombre.charAt(0);
+      var cicBadge=r.ciclo?(r.ciclo==='Docente'?'<small><span style="background:#f3e8ff;color:#6b21a8;border-radius:4px;padding:1px 5px;font-size:.68rem">Docente</span></small>':'<small>'+r.ciclo+'</small>'):'<small style="color:#d1d5db">Sin ciclo</small>';
+      var data=encodeURIComponent(JSON.stringify(r));
+      return `<div class="ritem" onclick="selectEst(decodeURIComponent('${data}'))">
+        <div class="av">${ini}</div><div class="rinfo"><strong>${r.nombre}</strong>${cicBadge}</div></div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<p class="empty" style="color:var(--crimson)">Error al buscar.</p>';}
+}
+function selectEst(json){
+  var r=typeof json==='string'?JSON.parse(json):json;
+  S.est=r;
+  document.getElementById('v-list').innerHTML='';
+  document.getElementById('v-q').value=r.nombre;
+  setText('v-nom',r.nombre);
+  var wrap=document.getElementById('v-cic-wrap');
+  var disp=document.getElementById('v-cic-disp');
+  var sel=document.getElementById('v-cic');
+  var cicloFinal='';
+  if(r.ciclo&&r.ciclo.trim()!==''){
+    cicloFinal=r.ciclo;
+    var bc=r.ciclo==='Docente'?'bv':'bg';
+    disp.innerHTML=r.ciclo+' <span class="badge '+bc+'">✓ Ya registrado</span>';
+    wrap.style.display='none';sel.value=r.ciclo;
+  }else{
+    disp.innerHTML='<span class="badge by">Sin asignar — selecciona abajo</span>';
+    wrap.style.display='block';sel.value='';
+  }
+  // Sección A/B — mostrar, resetear, luego pre-seleccionar si ya tiene
+  resetSeccion('v');
+  mostrarSeccion('v', cicloFinal);
+  if(r.seccion&&r.seccion!=='')setSeccion('v',r.seccion);
+  document.getElementById('v-tkt').value='';
+  clrMsg('msg-v');
+  document.getElementById('v-form-est').style.display='block';
+}
+
+/* ── GUARDAR VENTA EST/DOC ── */
+async function saveVentaEst(){
+  var est=S.est;
+  if(!est){msgEl('msg-v','Selecciona un estudiante o docente.','err');return;}
+  var ciclo=(est.ciclo&&est.ciclo.trim()!=='')?est.ciclo:document.getElementById('v-cic').value;
+  if(!ciclo){msgEl('msg-v','Selecciona el ciclo/categoría.','err');return;}
+  var tkt=document.getElementById('v-tkt').value.trim();
+  if(!tkt){msgEl('msg-v','Ingresa el número de ticket.','err');return;}
+  var seccion=getSeccion('v');
+  var btn=document.getElementById('btn-v');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Guardando…';
+  try{
+    var res=await apiPost({action:'registrarVenta',evento:S.evento,nombre:est.nombre,ciclo:ciclo,ticket:tkt,seccion:seccion,rowListado:parseInt(est.rowIndex,10)||-1,usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    if(res.ok){showModal('🎉','¡Venta Registrada!','Ticket No. '+tkt+'\n'+est.nombre+'\nCiclo: '+res.ciclo+(seccion?'\nSección: '+seccion:''));limpiarEst();}
+    else msgEl('msg-v','❌ '+(res.msg||'Error al registrar.'),'err');
+  }catch(e){msgEl('msg-v','⚠️ Error de conexión. Intenta de nuevo.','err');}
+  finally{btn.disabled=false;btn.innerHTML='REGISTRAR VENTA';}
+}
+
+/* ── GUARDAR VENTA PARTICULAR ── */
+async function saveVentaPart(){
+  var nombre=document.getElementById('p-nombre').value.trim();
+  if(!nombre){msgEl('msg-p','Ingresa el nombre del particular.','err');return;}
+  var tkt=document.getElementById('p-ticket').value.trim();
+  if(!tkt){msgEl('msg-p','Ingresa el número de ticket.','err');return;}
+  var btn=document.getElementById('btn-p');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Guardando…';
+  try{
+    var res=await apiPost({action:'registrarVenta',evento:S.evento,nombre:nombre,ciclo:'Particular',ticket:tkt,rowListado:-1,usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    if(res.ok){showModal('🎉','¡Particular Registrado!','Ticket No. '+tkt+'\n'+nombre+'\nCategoría: Particular');limpiarPart();}
+    else msgEl('msg-p','❌ '+(res.msg||'Error al registrar.'),'err');
+  }catch(e){msgEl('msg-p','⚠️ Error de conexión. Intenta de nuevo.','err');}
+  finally{btn.disabled=false;btn.innerHTML='REGISTRAR PARTICULAR';}
+}
+
+function limpiarEst(){S.est=null;document.getElementById('v-q').value='';document.getElementById('v-list').innerHTML='';document.getElementById('v-form-est').style.display='none';document.getElementById('v-tkt').value='';resetSeccion('v');document.getElementById('v-sec-wrap').style.display='none';clrMsg('msg-v');}
+function limpiarPart(){document.getElementById('p-nombre').value='';document.getElementById('p-ticket').value='';clrMsg('msg-p');}
+
+/* ── EQUIPO JUGADOR ── */
+function setEquipo(eq){
+  ['A','B','C','D'].forEach(function(e){
+    var el=document.getElementById('jug-eq-'+e.toLowerCase());
+    if(!el)return;
+    el.className='sec-opt'+(e===eq?' sel-A':'');
+    el.querySelector('input').checked=(e===eq);
+  });
+  // Consultar siguiente código al servidor
+  var inp=document.getElementById('jug-codigo');
+  var hint=document.getElementById('jug-cod-hint');
+  inp.value='';
+  inp.placeholder='Cargando…';
+  if(hint)hint.textContent='';
+  apiGet({action:'siguienteCodigo',equipo:eq}).then(function(res){
+    var cod=res.codigo||('J'+eq+'-1');
+    inp.value=cod;
+    inp.placeholder=cod;
+    if(hint)hint.textContent='(sugerido — puedes cambiarlo)';
+  }).catch(function(){
+    inp.value='J'+eq+'-1';
+    inp.placeholder='J'+eq+'-1';
+  });
+}
+
+/* ── JUGADOR ── */
+var _jtmr=null;
+function liveSearchJug(){clearTimeout(_jtmr);_jtmr=setTimeout(doSearchJug,350);}
+async function doSearchJug(){
+  var q=document.getElementById('jug-q').value.trim();
+  var list=document.getElementById('jug-list');
+  if(q.length<2){list.innerHTML='';document.getElementById('jug-form').style.display='none';return;}
+  list.innerHTML='<p class="empty">Buscando…</p>';
+  try{
+    var res=await apiGet({action:'buscar',q:q});
+    var arr=res.resultados||[];
+    if(!arr.length){list.innerHTML='<p class="empty">Sin resultados para "'+q+'" en el listado.</p>';return;}
+    list.innerHTML=arr.map(r=>{
+      var ini=r.nombre.charAt(0);
+      var cicBadge=r.ciclo?'<small>'+r.ciclo+'</small>':'<small style="color:#d1d5db">Sin ciclo</small>';
+      var data=encodeURIComponent(JSON.stringify(r));
+      return `<div class="ritem" onclick="selectJug(decodeURIComponent('${data}'))">
+        <div class="av av-g">${ini}</div><div class="rinfo"><strong>${r.nombre}</strong>${cicBadge}</div></div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<p class="empty" style="color:var(--crimson)">Error al buscar.</p>';}
+}
+function selectJug(json){
+  var r=typeof json==='string'?JSON.parse(json):json;
+  S.jugador=r;
+  document.getElementById('jug-list').innerHTML='';
+  document.getElementById('jug-q').value=r.nombre;
+  setText('jug-nom',r.nombre);
+  var wrap=document.getElementById('jug-cic-wrap');
+  var disp=document.getElementById('jug-cic-disp');
+  var sel=document.getElementById('jug-cic');
+  var cicloFinal='';
+  if(r.ciclo&&r.ciclo.trim()!==''){
+    cicloFinal=r.ciclo;
+    var bc=r.ciclo==='Docente'?'bv':'bg';
+    disp.innerHTML=r.ciclo+' <span class="badge '+bc+'">✓ Ya registrado</span>';
+    wrap.style.display='none';sel.value=r.ciclo;
+  }else{
+    disp.innerHTML='<span class="badge by">Sin asignar — selecciona abajo</span>';
+    wrap.style.display='block';sel.value='';
+  }
+  // Sección A/B
+  resetSeccion('jug');
+  mostrarSeccion('jug', cicloFinal);
+  if(r.seccion&&r.seccion!=='')setSeccion('jug',r.seccion);
+  document.getElementById('jug-codigo').value='';
+  clrMsg('msg-jug');
+  document.getElementById('jug-form').style.display='block';
+}
+async function saveJugador(){
+  var jug=S.jugador;
+  if(!jug){msgEl('msg-jug','Selecciona un jugador del listado.','err');return;}
+  var ciclo=(jug.ciclo&&jug.ciclo.trim()!=='')?jug.ciclo:document.getElementById('jug-cic').value;
+  if(!ciclo){msgEl('msg-jug','Selecciona el ciclo/categoría.','err');return;}
+  var codigo=document.getElementById('jug-codigo').value.trim().toUpperCase();
+  if(!codigo){msgEl('msg-jug','Ingresa el código del jugador (ej. J-1).','err');return;}
+  if(!codigo.match(/^J[ABCD]-\d+$/)){msgEl('msg-jug','El código debe ser JA-1, JB-1, JC-1 o JD-1.','err');return;}
+  var seccion=getSeccion('jug');
+  var btn=document.getElementById('btn-jug');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Registrando…';
+  try{
+    var res=await apiPost({action:'registrarJugador',nombre:jug.nombre,ciclo:ciclo,codigo:codigo,seccion:seccion,rowListado:parseInt(jug.rowIndex,10)||-1,usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    if(res.ok){
+      showModal('⚽','¡Jugador Registrado!',jug.nombre+'\nCiclo: '+res.ciclo+'\nCódigo: '+res.codigo+(seccion?'\nSección: '+seccion:''));
+      limpiarJug();
+    }else msgEl('msg-jug','❌ '+(res.msg||'Error al registrar.'),'err');
+  }catch(e){msgEl('msg-jug','⚠️ Error de conexión.','err');}
+  finally{btn.disabled=false;btn.innerHTML='⚽ REGISTRAR JUGADOR';}
+}
+function limpiarJug(){
+  S.jugador=null;
+  document.getElementById('jug-q').value='';
+  document.getElementById('jug-list').innerHTML='';
+  document.getElementById('jug-form').style.display='none';
+  document.getElementById('jug-codigo').value='';
+  document.getElementById('jug-codigo').placeholder='Selecciona un equipo primero…';
+  var hint=document.getElementById('jug-cod-hint');if(hint)hint.textContent='';
+  ['A','B','C','D'].forEach(function(e){
+    var el=document.getElementById('jug-eq-'+e.toLowerCase());
+    if(el){el.className='sec-opt';el.querySelector('input').checked=false;}
+  });
+  resetSeccion('jug');
+  clrMsg('msg-jug');
+}
+
+/* ── CONGRESO — MODO ── */
+function setCModo(m){
+  S.cmodo=m;
+  document.getElementById('ctab-est').className='modo-tab'+(m==='est'?' act-est':'');
+  document.getElementById('ctab-part').className='modo-tab'+(m==='part'?' act-part':'');
+  document.getElementById('cmodo-est').style.display=m==='est'?'block':'none';
+  document.getElementById('cmodo-part').style.display=m==='part'?'block':'none';
+}
+
+/* ── CONGRESO — TIPO PAGO ── */
+function setPago(tipo){
+  S.tipoPago=tipo;
+  document.getElementById('ptab-comp').className='pago-tab'+(tipo==='completo'?' act-comp':'');
+  document.getElementById('ptab-parc').className='pago-tab'+(tipo==='parcial'?' act-parc':'');
+  document.getElementById('pago-completo-box').style.display=tipo==='completo'?'block':'none';
+  document.getElementById('pago-parcial-box').style.display=tipo==='parcial'?'block':'none';
+}
+
+/* ── CONGRESO — BÚSQUEDA EST ── */
+var _ctmr=null;
+function liveCSearch(){clearTimeout(_ctmr);_ctmr=setTimeout(doCSearch,350);}
+async function doCSearch(){
+  var q=document.getElementById('cq').value.trim();
+  var list=document.getElementById('c-list');
+  if(q.length<2){list.innerHTML='';document.getElementById('c-form-est').style.display='none';return;}
+  list.innerHTML='<p class="empty">Buscando…</p>';
+  try{
+    var res=await apiGet({action:'buscar',q:q});
+    var arr=res.resultados||[];
+    if(!arr.length){list.innerHTML='<p class="empty">Sin resultados para "'+q+'"</p>';return;}
+    list.innerHTML=arr.map(r=>{
+      var ini=r.nombre.charAt(0);
+      var cicBadge=r.ciclo?'<small>'+r.ciclo+'</small>':'<small style="color:#d1d5db">Sin ciclo</small>';
+      var data=encodeURIComponent(JSON.stringify(r));
+      return `<div class="ritem" onclick="selectCEst(decodeURIComponent('${data}'))">
+        <div class="av">${ini}</div><div class="rinfo"><strong>${r.nombre}</strong>${cicBadge}</div></div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<p class="empty" style="color:var(--crimson)">Error al buscar.</p>';}
+}
+function selectCEst(json){
+  var r=typeof json==='string'?JSON.parse(json):json;
+  S.cEst=r;
+  document.getElementById('c-list').innerHTML='';
+  document.getElementById('cq').value=r.nombre;
+  setText('c-nom',r.nombre);
+  var wrap=document.getElementById('c-cic-wrap');
+  var disp=document.getElementById('c-cic-disp');
+  var sel=document.getElementById('c-cic');
+  var cicloFinal='';
+  if(r.ciclo&&r.ciclo.trim()!==''){
+    cicloFinal=r.ciclo;
+    var bc=r.ciclo==='Docente'?'bv':'bg';
+    disp.innerHTML=r.ciclo+' <span class="badge '+bc+'">✓ Ya registrado</span>';
+    wrap.style.display='none';sel.value=r.ciclo;
+  }else{
+    disp.innerHTML='<span class="badge by">Sin asignar — selecciona abajo</span>';
+    wrap.style.display='block';sel.value='';
+  }
+  // Sección A/B
+  resetSeccion('c');
+  mostrarSeccion('c', cicloFinal);
+  if(r.seccion&&r.seccion!=='')setSeccion('c',r.seccion);
+  clrMsg('msg-cest');
+  document.getElementById('c-form-est').style.display='block';
+}
+
+/* Vista previa saldo */
+document.addEventListener('DOMContentLoaded',function(){
+  var abonoInp=document.getElementById('c-abono');
+  if(abonoInp){
+    abonoInp.addEventListener('input',function(){
+      var ab=parseFloat(this.value)||0;
+      var saldo=250-ab;
+      var prev=document.getElementById('c-saldo-preview');
+      if(ab>0&&saldo>0){
+        prev.style.display='block';
+        prev.innerHTML='<div class="saldo-badge">Saldo pendiente: Q'+saldo.toFixed(2)+'</div>';
+      }else{prev.style.display='none';}
+    });
+  }
+});
+
+/* ── GUARDAR VENTA CONGRESO EST/DOC ── */
+async function saveCEst(){
+  var est=S.cEst;
+  if(!est){msgEl('msg-cest','Selecciona un participante.','err');return;}
+  var ciclo=(est.ciclo&&est.ciclo.trim()!=='')?est.ciclo:document.getElementById('c-cic').value;
+  if(!ciclo){msgEl('msg-cest','Selecciona el ciclo/categoría.','err');return;}
+  var correo=document.getElementById('c-correo-est').value.trim();
+  var telefono=document.getElementById('c-tel-est').value.trim();
+  if(!correo){msgEl('msg-cest','El correo es obligatorio.','err');return;}
+  if(!telefono){msgEl('msg-cest','El teléfono es obligatorio.','err');return;}
+  var ticket='',abono=0;
+  if(S.tipoPago==='completo'){
+    ticket=document.getElementById('c-tkt-comp').value.trim();
+    if(!ticket){msgEl('msg-cest','Ingresa el número de ticket.','err');return;}
+    abono=250;
+  }else{
+    ticket=document.getElementById('c-tkt-parc').value.trim();
+    if(!ticket){msgEl('msg-cest','Ingresa el número de ticket.','err');return;}
+    abono=parseFloat(document.getElementById('c-abono').value)||0;
+    if(abono<=0){msgEl('msg-cest','Ingresa el monto del abono.','err');return;}
+    if(abono>=250){msgEl('msg-cest','El abono cubre el total. Usa Pago Completo.','err');return;}
+  }
+  var seccion=getSeccion('c');
+  var btn=document.getElementById('btn-cest');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Guardando…';
+  try{
+    var res=await apiPost({action:'registrarVentaCongreso',nombre:est.nombre,ciclo:ciclo,ticket:ticket,tipoPago:S.tipoPago,abono:abono,correo:correo,telefono:telefono,seccion:seccion,rowListado:parseInt(est.rowIndex,10)||-1,usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    if(res.ok){
+      var txt=S.tipoPago==='completo'?'Ticket No. '+ticket+'\n'+est.nombre+'\nCiclo: '+res.ciclo+(seccion?'\nSección: '+seccion:'')+'\nMonto: Q250.00':est.nombre+'\nAbono: Q'+abono+'\nSaldo pendiente: Q'+res.saldo;
+      showModal('🎉',S.tipoPago==='completo'?'¡Venta Congreso Registrada!':'¡Abono Registrado!',txt);
+      limpiarCEst();
+    }else msgEl('msg-cest','❌ '+(res.msg||'Error.'),'err');
+  }catch(e){msgEl('msg-cest','⚠️ Error de conexión.','err');}
+  finally{btn.disabled=false;btn.innerHTML='REGISTRAR VENTA';}
+}
+
+/* ── GUARDAR VENTA CONGRESO PARTICULAR ── */
+async function saveCPart(){
+  var nombre=document.getElementById('cp-nombre').value.trim();
+  if(!nombre){msgEl('msg-cpart','Ingresa el nombre.','err');return;}
+  var ticket=document.getElementById('cp-ticket').value.trim();
+  if(!ticket){msgEl('msg-cpart','Ingresa el número de ticket.','err');return;}
+  var correo=document.getElementById('cp-correo').value.trim();
+  var tel=document.getElementById('cp-tel').value.trim();
+  if(!correo){msgEl('msg-cpart','El correo es obligatorio.','err');return;}
+  if(!tel){msgEl('msg-cpart','El teléfono es obligatorio.','err');return;}
+  var btn=document.getElementById('btn-cpart');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Guardando…';
+  try{
+    var res=await apiPost({action:'registrarVentaCongreso',nombre:nombre,ciclo:'Particular',ticket:ticket,tipoPago:'completo',abono:275,correo:correo,telefono:tel,rowListado:-1,usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    if(res.ok){showModal('🎉','¡Particular Congreso!','Ticket No. '+ticket+'\n'+nombre+'\nMonto: Q275.00');limpiarCPart();}
+    else msgEl('msg-cpart','❌ '+(res.msg||'Error.'),'err');
+  }catch(e){msgEl('msg-cpart','⚠️ Error de conexión.','err');}
+  finally{btn.disabled=false;btn.innerHTML='REGISTRAR PARTICULAR';}
+}
+
+function limpiarCEst(){S.cEst=null;document.getElementById('cq').value='';document.getElementById('c-list').innerHTML='';document.getElementById('c-form-est').style.display='none';document.getElementById('c-tkt-comp').value='';document.getElementById('c-tkt-parc').value='';document.getElementById('c-abono').value='';document.getElementById('c-correo-est').value='';document.getElementById('c-tel-est').value='';document.getElementById('c-saldo-preview').style.display='none';resetSeccion('c');var csw=document.getElementById('c-sec-wrap');if(csw)csw.style.display='none';clrMsg('msg-cest');}
+function limpiarCPart(){document.getElementById('cp-nombre').value='';document.getElementById('cp-ticket').value='';document.getElementById('cp-correo').value='';document.getElementById('cp-tel').value='';clrMsg('msg-cpart');}
+
+/* ── COMPLETAR PAGO CONGRESO ── */
+var _comtmr=null;
+function liveCompSearch(){clearTimeout(_comtmr);_comtmr=setTimeout(doCompSearch,350);}
+async function doCompSearch(){
+  var q=document.getElementById('comp-q').value.trim();
+  var list=document.getElementById('comp-list');
+  if(q.length<2){list.innerHTML='';document.getElementById('comp-form').style.display='none';return;}
+  list.innerHTML='<p class="empty">Buscando…</p>';
+  try{
+    var res=await apiGet({action:'buscarCongresoNombre',q:q});
+    var arr=res.resultados||res||[];
+    if(!Array.isArray(arr))arr=[];
+    if(!arr.length){list.innerHTML='<p class="empty">Sin saldos pendientes para "'+q+'"</p>';return;}
+    list.innerHTML=arr.map(r=>{
+      var data=encodeURIComponent(JSON.stringify(r));
+      return `<div class="ritem" onclick="selectComp(decodeURIComponent('${data}'))">
+        <div class="av">${r.nombre.charAt(0)}</div>
+        <div class="rinfo"><strong>${r.nombre}</strong><small>Saldo: Q${r.saldo} | Abono: Q${r.abono}</small></div></div>`;
+    }).join('');
+  }catch(e){list.innerHTML='<p class="empty" style="color:var(--crimson)">Error al buscar.</p>';}
+}
+function selectComp(json){
+  var r=typeof json==='string'?JSON.parse(json):json;
+  S.compRow=r;
+  document.getElementById('comp-list').innerHTML='';
+  document.getElementById('comp-q').value=r.nombre;
+  setText('comp-nom',r.nombre);setText('comp-cic',r.ciclo||'—');
+  setText('comp-abono','Q'+r.abono);setText('comp-saldo','Q'+r.saldo);
+  document.getElementById('comp-tkt').value='';
+  clrMsg('msg-comp');
+  document.getElementById('comp-form').style.display='block';
+}
+async function doCompletar(){
+  if(!S.compRow)return;
+  var btn=document.getElementById('btn-comp');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Procesando…';
+  try{
+    var res=await apiPost({action:'completarPagoCongreso',rowIndex:S.compRow.rowIndex,ticket:'',usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    if(res.ok){
+      var total=(parseFloat(S.compRow.abono)+parseFloat(S.compRow.saldo)).toFixed(2);
+      showModal('✅','¡Pago Completado!',S.compRow.nombre+'
+Abono anterior: Q'+S.compRow.abono+'
+Saldo cancelado: Q'+S.compRow.saldo+'
+Total: Q'+total);
+      limpiarComp();
+    }else msgEl('msg-comp','❌ '+(res.msg||'Error.'),'err');
+  }catch(e){msgEl('msg-comp','⚠️ Error de conexión.','err');}
+  finally{btn.disabled=false;btn.innerHTML='✅ COMPLETAR PAGO';}
+}
+function limpiarComp(){S.compRow=null;document.getElementById('comp-q').value='';document.getElementById('comp-list').innerHTML='';document.getElementById('comp-form').style.display='none';clrMsg('msg-comp');}
+
+/* ── CHECK-IN TABS ── */
+function setCITab(tab){
+  S.ciTab=tab;
+  document.getElementById('ci-tab-tkt').className='ci-tab'+(tab==='tkt'?' act':'');
+  document.getElementById('ci-tab-nom').className='ci-tab'+(tab==='nom'?' act':'');
+  document.getElementById('ci-modo-tkt').style.display=tab==='tkt'?'block':'none';
+  document.getElementById('ci-modo-nom').style.display=tab==='nom'?'block':'none';
+  document.getElementById('ci-res').style.display='none';
+  document.getElementById('ci-nom-list').innerHTML='';
+  clrMsg('msg-ci');
+}
+
+/* ── CHECK-IN POR TICKET / CÓDIGO ── */
+async function searchTicket(){
+  var tkt=document.getElementById('ci-tkt').value.trim().toUpperCase();
+  if(!tkt)return;
+  document.getElementById('ci-res').style.display='none';clrMsg('msg-ci');
+  try{
+    var res=await apiGet({action:'buscarTicket',evento:S.evento,ticket:tkt});
+    mostrarResultadoCI(res);
+  }catch(e){msgEl('msg-ci','⚠️ Error de conexión.','err');document.getElementById('ci-res').style.display='block';}
+}
+
+/* ── CHECK-IN POR NOMBRE ── */
+var _cinomtmr=null;
+function liveCINomSearch(){clearTimeout(_cinomtmr);_cinomtmr=setTimeout(doCINomSearch,350);}
+async function doCINomSearch(){
+  var q=document.getElementById('ci-nom-q').value.trim();
+  var list=document.getElementById('ci-nom-list');
+  if(q.length<2){list.innerHTML='';document.getElementById('ci-res').style.display='none';return;}
+  list.innerHTML='<p class="empty">Buscando…</p>';
+  try{
+    var res=await apiGet({action:'buscarPorNombre',evento:S.evento,q:q});
+    var arr=res.resultados||[];
+    if(!arr.length){list.innerHTML='<p class="empty">Sin resultados para "'+q+'"</p>';return;}
+    list.innerHTML=arr.map(r=>{
+      var esJug=r.ticket&&r.ticket.toUpperCase().match(/^J[ABCD]-\d+$/);
+      var badge=esJug?'<span class="badge bjug">⚽ Jugador</span>':'<span class="badge bb">🎟️ '+r.ticket+'</span>';
+      var ci=r.checkin?'<span class="badge br">Ya ingresó</span>':'<span class="badge bg">Pendiente</span>';
+      var data=encodeURIComponent(JSON.stringify(r));
+      return `<div class="ritem" onclick="selectCINom(decodeURIComponent('${data}'))">
+        <div class="av${esJug?' av-g':''}">${r.nombre.charAt(0)}</div>
+        <div class="rinfo"><strong>${r.nombre}</strong><small>${badge} ${ci}</small></div></div>`;
+    }).join('');
+    document.getElementById('ci-res').style.display='none';
+  }catch(e){list.innerHTML='<p class="empty" style="color:var(--crimson)">Error al buscar.</p>';}
+}
+function selectCINom(json){
+  var r=typeof json==='string'?JSON.parse(json):json;
+  document.getElementById('ci-nom-list').innerHTML='';
+  mostrarResultadoCI({ok:true, rowIndex:r.rowIndex, nombre:r.nombre, ciclo:r.ciclo, ticket:r.ticket, checkin:r.checkin});
+}
+
+/* ── MOSTRAR RESULTADO CI ── */
+function mostrarResultadoCI(res){
+  document.getElementById('ci-res').style.display='block';
+  if(!res.ok){
+    msgEl('msg-ci','❌ '+res.msg,'err');
+    document.getElementById('btn-ci').style.display='none';
+    return;
+  }
+  S.ciRow=res.rowIndex;
+  setText('ci-nom-val',res.nombre);
+  setText('ci-cic',res.ciclo||'—');
+  var esJug=res.ticket&&res.ticket.toUpperCase().match(/^J[ABCD]-\d+$/)||res.esJugador;
+  document.getElementById('ci-code-lbl').textContent=esJug?'Código Jugador':'No. de Ticket';
+  setText('ci-num',res.ticket);
+  // color de la tarjeta según tipo
+  document.getElementById('ci-dcard').className=esJug?'dcard dcard-g':'dcard';
+  var prevRow=document.getElementById('ci-prev-row');
+  var btnCI=document.getElementById('btn-ci');
+  if(res.checkin){
+    prevRow.style.display='flex';
+    document.getElementById('ci-prev').innerHTML=res.checkin+' <span class="badge br">Ya ingresó</span>';
+    btnCI.style.display='none';
+    msgEl('msg-ci','⚠️ '+(esJug?'Este jugador':'Este ticket')+' ya tiene check-in: '+res.checkin,'err');
+  }else{
+    prevRow.style.display='none';btnCI.style.display='block';btnCI.disabled=false;
+    btnCI.innerHTML=esJug?'⚽ REGISTRAR INGRESO JUGADOR':'✅ REGISTRAR CHECK-IN';
+  }
+}
+
+/* ── REGISTRAR CHECK-IN ── */
+async function doCheckin(){
+  if(!S.ciRow)return;
+  var btn=document.getElementById('btn-ci');
+  btn.disabled=true;btn.innerHTML='<span class="spin"></span> Registrando…';
+  try{
+    var res=await apiPost({action:'registrarCheckin',evento:S.evento,rowIndex:S.ciRow,usuario:S.user.pin,nombreUsuario:S.user.nombre});
+    if(res.ok){
+      var nom=document.getElementById('ci-nom-val').textContent;
+      showModal('✅','¡Check-in Registrado!',nom+'\nEntrada: '+res.fechaHora);
+      document.getElementById('ci-prev-row').style.display='flex';
+      document.getElementById('ci-prev').innerHTML=res.fechaHora+' <span class="badge bg">✓ Registrado</span>';
+      btn.style.display='none';
+      setTimeout(resetCI,400);
+    }else{msgEl('msg-ci','❌ '+res.msg,'err');btn.disabled=false;btn.innerHTML='✅ REGISTRAR CHECK-IN';}
+  }catch(e){msgEl('msg-ci','⚠️ Error de conexión.','err');btn.disabled=false;btn.innerHTML='✅ REGISTRAR CHECK-IN';}
+}
+function resetCI(){
+  S.ciRow=null;
+  document.getElementById('ci-tkt').value='';
+  document.getElementById('ci-nom-q').value='';
+  document.getElementById('ci-nom-list').innerHTML='';
+  document.getElementById('ci-res').style.display='none';
+  clrMsg('msg-ci');
+  var btn=document.getElementById('btn-ci');
+  btn.style.display='block';btn.disabled=false;btn.innerHTML='✅ REGISTRAR CHECK-IN';
+}
+
+/* ── RESUMEN ── */
+async function verResumen(key){
+  S.resumenKey=key;
+  document.querySelectorAll('.res-evcard').forEach(c=>c.classList.remove('activo'));
+  document.getElementById('rev-'+key).classList.add('activo');
+  document.getElementById('res-body').innerHTML='<p class="empty">Cargando…</p>';
+  try{
+    var data=await apiGet({action:'resumen'});
+    renderResumen(key,data);
+  }catch(e){document.getElementById('res-body').innerHTML='<p style="color:var(--crimson);text-align:center;padding:20px">⚠️ Error de conexión.</p>';}
+}
+function renderResumen(key,data){
+  var ev=data[key];
+  var nom={partido3:'⚽ Fútbol 3',bingo:'🎱 Bingo',congreso:'🎓 Congreso'};
+  if(!ev){document.getElementById('res-body').innerHTML='<p class="empty">Sin datos.</p>';return;}
+  var tv=ev.totalVentas||0, tc=ev.totalCheckin||0;
+  var jugI=ev.jugInscritos||0, jugC=ev.jugCheckin||0;
+
+  var resumenExtra = key==='partido3'
+    ? ' · ⚽ '+jugI+' jugadores'
+    : '';
+
+  var html=`<div class="rev-wrap"><div class="rev-head"><h3>${nom[key]}</h3>
+    <span class="rev-cnt">🎟️ ${tv} vendidos · ✅ ${tc} ingresos${resumenExtra}</span></div>
+    <table><thead><tr><th>Ciclo / Categoría</th><th class="num">🎟️ Tickets Vendidos</th><th class="num">✅ Check-in</th></tr></thead><tbody>`;
+
+  var totalV=0,totalC=0;
+  ORDEN.forEach(ciclo=>{
+    var c=(ev.conteo&&ev.conteo[ciclo])?ev.conteo[ciclo]:{ventas:0,checkin:0};
+    totalV+=c.ventas;totalC+=c.checkin;
+    html+=`<tr><td>${ciclo}</td>
+      <td class="num"><span class="num-val nv-b">${c.ventas}</span></td>
+      <td class="num"><span class="num-val nv-g">${c.checkin}</span></td></tr>`;
+  });
+
+  html+=`<tr class="tr-tot"><td>TOTAL TICKETS</td>
+    <td class="num"><span class="num-val nv-b">${totalV}</span></td>
+    <td class="num"><span class="num-val nv-g">${totalC}</span></td></tr>`;
+
+  // Fila extra de jugadores solo en partido3
+  if(key==='partido3'){
+    html+=`<tr class="tr-jug"><td>⚽ JUGADORES</td>
+      <td class="num"><span class="num-val nv-grn">${jugI}</span></td>
+      <td class="num"><span class="num-val nv-grn">${jugC}</span></td></tr>`;
+  }
+
+  html+=`</tbody></table></div>`;
+  document.getElementById('res-body').innerHTML=html;
+}
+function recargarResumen(){if(S.resumenKey)verResumen(S.resumenKey);}
+</script>
+</body>
+</html>
